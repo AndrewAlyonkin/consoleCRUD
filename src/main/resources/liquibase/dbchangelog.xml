@@ -4,6 +4,59 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
-    <!-- здесь будут changesets базы -->
+    <changeSet author="alenkin" id="30052021-1">
+        <createTable tableName="writers">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <rollback>
+            <dropTable tableName="writers"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="alenkin" id="30052021-2">
+        <createTable tableName="posts">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="content" type="VARCHAR"/>
+            <column name="create_time" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="update_time" type="TIMESTAMP"/>
+            <column name="writer_id" type="BIGINT">
+                <constraints foreignKeyName="fk_writer_id" references="writers(id)" nullable="false"/>
+            </column>
+        </createTable>
+        <rollback>
+            <dropTable tableName="posts"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="alenkin" id="30052021-3">
+        <createTable tableName="labels">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="writer_id" type="BIGINT">
+                <constraints foreignKeyName="fk_post_id" references="posts(id)" nullable="false"/>
+            </column>
+        </createTable>
+        <rollback>
+            <dropTable tableName="labels"/>
+        </rollback>
+    </changeSet>
+
+
 
 </databaseChangeLog>
