@@ -97,7 +97,7 @@
                     <groupId>org.liquibase</groupId>
                     <artifactId>liquibase-maven-plugin</artifactId>
                     <configuration>
-                        <propertyFile>src/main/resources/liquibase/liquibase.properties</propertyFile>
+                        <propertyFile>src/main/resources/DBCredentials.properties</propertyFile>
                     </configuration>
                     <executions>
                         <execution>
