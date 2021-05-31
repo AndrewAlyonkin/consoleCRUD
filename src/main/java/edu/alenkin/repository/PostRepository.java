@@ -24,7 +24,7 @@ public interface PostRepository {
      * @param post the new {@link edu.alenkin.model.Post post} for saving in storage
      * @throws ExistException if current post is already exist in storage
      */
-    void createPost(Post post) throws ExistException;
+    void addPost(Post post) throws ExistException;
 
     /**
      * Takes {@link edu.alenkin.model.Post post}, finds it in storage and deletes it
@@ -32,7 +32,7 @@ public interface PostRepository {
      * @param post the {@link edu.alenkin.model.Post post} for deleting from storage
      * @throws NotExistException if current post doesnt exist in storage
      */
-    void deletePost(Post post) throws NotExistException;
+    void removePost(Post post) throws NotExistException;
 
     /**
      * Takes modified {@link edu.alenkin.model.Post post}, finds it in the storage and updates it
@@ -58,4 +58,9 @@ public interface PostRepository {
      * or null if {@link edu.alenkin.model.Post posts} storage is empty
      */
     List<Post> getAllPosts();
+
+    /**
+     * Clear all Posts data form data storage
+     */
+    void clear();
 }

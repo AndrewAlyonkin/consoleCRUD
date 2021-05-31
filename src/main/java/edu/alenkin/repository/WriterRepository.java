@@ -24,7 +24,7 @@ public interface WriterRepository {
      * @param writer the {@link edu.alenkin.model.Writer writer} for saving in storage
      * @throws ExistException if same {@link edu.alenkin.model.Writer writer} is already exists in storage
      */
-    void createWriter(Writer writer) throws ExistException;
+    void addWriter(Writer writer) throws ExistException;
 
     /**
      * Takes {@link edu.alenkin.model.Writer writer}, finds it in storage and deletes it
@@ -32,7 +32,7 @@ public interface WriterRepository {
      * @param writer the {@link edu.alenkin.model.Writer writer} for deleting from storage
      * @throws NotExistException if current {@link edu.alenkin.model.Writer writer} is doesnt exist in storage
      */
-    void deleteWriter(Writer writer) throws NotExistException;
+    void removeWriter(Writer writer) throws NotExistException;
 
     /**
      * Takes modified {@link edu.alenkin.model.Writer writer} and update it in the storage
@@ -59,4 +59,8 @@ public interface WriterRepository {
      */
     List<Writer> getAllWriters();
 
+    /**
+     * Clear all writers data from data storage
+     */
+    void clear();
 }

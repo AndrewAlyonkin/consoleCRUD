@@ -18,12 +18,12 @@ import java.util.List;
 public class PostRepositoryImpl implements PostRepository{
 
     @Override
-    public void createPost(Post post) throws ExistException {
+    public void addPost(Post post) throws ExistException {
 
     }
 
     @Override
-    public void deletePost(Post post) throws NotExistException {
+    public void removePost(Post post) throws NotExistException {
 
     }
 
@@ -40,5 +40,10 @@ public class PostRepositoryImpl implements PostRepository{
     @Override
     public List<Post> getAllPosts() {
         return null;
+    }
+
+    @Override
+    public void clear() {
+
     }
 }

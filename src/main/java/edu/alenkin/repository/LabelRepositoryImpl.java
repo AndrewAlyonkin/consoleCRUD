@@ -1,5 +1,6 @@
 package edu.alenkin.repository;
 
+import edu.alenkin.dataBaseUtil.DBWorker;
 import edu.alenkin.exception.ExistException;
 import edu.alenkin.exception.NotExistException;
 import edu.alenkin.model.Label;
@@ -18,12 +19,13 @@ import java.util.List;
 public class LabelRepositoryImpl implements LabelRepository{
 
     @Override
-    public void createLabel(Label label) throws ExistException {
+    public void addLabel(Label label) throws ExistException {
+
 
     }
 
     @Override
-    public void deleteLabel(Label label) throws NotExistException {
+    public void removeLabel(Label label) throws NotExistException {
 
     }
 
@@ -40,5 +42,10 @@ public class LabelRepositoryImpl implements LabelRepository{
     @Override
     public List<Label> getAllLabels() {
         return null;
+    }
+
+    @Override
+    public void clear() {
+
     }
 }

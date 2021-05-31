@@ -17,12 +17,12 @@ import java.util.List;
  */
 public class WriterRepositoryImpl implements WriterRepository{
     @Override
-    public void createWriter(Writer writer) throws ExistException {
+    public void addWriter(Writer writer) throws ExistException {
 
     }
 
     @Override
-    public void deleteWriter(Writer writer) throws NotExistException {
+    public void removeWriter(Writer writer) throws NotExistException {
 
     }
 
@@ -39,5 +39,10 @@ public class WriterRepositoryImpl implements WriterRepository{
     @Override
     public List<Writer> getAllWriters() {
         return null;
+    }
+
+    @Override
+    public void clear() {
+
     }
 }

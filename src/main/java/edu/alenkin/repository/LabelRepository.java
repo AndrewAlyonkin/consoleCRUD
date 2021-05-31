@@ -24,7 +24,7 @@ public interface LabelRepository {
      * @param label the new {@link edu.alenkin.model.Label} for saving in storage
      * @throws ExistException if current Label is already exists in storage
      */
-    void createLabel(Label label) throws ExistException;
+    void addLabel(Label label) throws ExistException;
 
     /**
      * Takes {@link edu.alenkin.model.Label label}, finds it in storage and deletes it
@@ -33,7 +33,7 @@ public interface LabelRepository {
      * @throws NotExistException if the {@link edu.alenkin.model.Label}
      *                           to be deleted is not present in storage
      */
-    void deleteLabel(Label label) throws NotExistException;
+    void removeLabel(Label label) throws NotExistException;
 
     /**
      * Takes modified {@link edu.alenkin.model.Label} and update it in the storage
@@ -61,4 +61,8 @@ public interface LabelRepository {
      */
     List<Label> getAllLabels();
 
+    /**
+     * Clear all Labels data fom data storage
+     */
+    void clear();
 }
