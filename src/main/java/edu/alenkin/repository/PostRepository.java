@@ -45,11 +45,11 @@ public interface PostRepository {
     /**
      * Takes the id of {@link edu.alenkin.model.Post post} and returns it from storage
      *
-     * @param id the id of searching {@link edu.alenkin.model.Post post} in storage
+     * @param id the id of searching {@link Post post} in storage
      * @return {@link edu.alenkin.model.Post post} with current id from storage
      * or null if post doesnt exist in storage
      */
-    Post getPostById(long id);
+    List<Post> getPostsByWriterId(long id);
 
     /**
      * Method for getting all {@link edu.alenkin.model.Post post} from storage
@@ -61,6 +61,7 @@ public interface PostRepository {
 
     /**
      * Clear all Posts data form data storage
+     * @return
      */
-    void clear();
+    boolean clear();
 }

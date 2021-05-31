@@ -47,11 +47,11 @@ public interface LabelRepository {
     /**
      * Takes id of {@link edu.alenkin.model.Label}, find it in storage and returns.
      *
-     * @param id the id of searching {@link edu.alenkin.model.Label}
+     * @param id the id of searching {@link Label}
      * @return {@link edu.alenkin.model.Label} by it id
      * or null if {@link edu.alenkin.model.Label} is not exist in storage
      */
-    Label getLabelById(long id);
+    List<Label> getLabelsByPostId(long id);
 
     /**
      * Method for getting all {@link edu.alenkin.model.Label labels} from storage
@@ -63,6 +63,7 @@ public interface LabelRepository {
 
     /**
      * Clear all Labels data fom data storage
+     * @return
      */
-    void clear();
+    boolean clear();
 }

@@ -10,7 +10,8 @@ import java.util.Properties;
  */
 
 /**
- * Class provides database configuration from DBCredentials.properties file for creating database connection.
+ * Class provides database configuration from DBCredentials.properties file for creating database connection
+ * in {@link edu.alenkin.repository.Repository super repository}.
  */
 public class Config {
     private final static Config instance = new Config();
@@ -22,12 +23,12 @@ public class Config {
 
     private Config() {
        dbCredentials = new Properties();
-       try (FileInputStream fis = new FileInputStream("DBCredentials.properties")) {
+       try (FileInputStream fis = new FileInputStream("src/main/resources/DBCredentials.properties")) {
            dbCredentials.load(fis);
        } catch (IOException e) {
            e.printStackTrace();
        }
-       this.dbDriver = dbCredentials.getProperty("classpath");
+       this.dbDriver = dbCredentials.getProperty("driver");
        this.dbURL = dbCredentials.getProperty("url");
        this.dbPassword = dbCredentials.getProperty("password");
        this.dbUser = dbCredentials.getProperty("username");

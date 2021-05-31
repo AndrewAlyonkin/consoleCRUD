@@ -19,11 +19,15 @@ public class Repository {
     private static Config config = Config.getInstance();
     protected DBWorker dbWorker;
 
-    public Repository() throws SQLException, ClassNotFoundException {
-        this.dbWorker = new DBWorker(() -> DriverManager.getConnection(
-                config.getDbURL(),
-                config.getDbUser(),
-                config.getDbPassword()
-        ));
+    public Repository() {
+        try {
+            this.dbWorker = new DBWorker(() -> DriverManager.getConnection(
+                    config.getDbURL(),
+                    config.getDbUser(),
+                    config.getDbPassword()
+            ));
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -1,5 +1,8 @@
 package edu.alenkin.dataBaseUtil;
 
+import edu.alenkin.exception.ExistException;
+import edu.alenkin.exception.NotExistException;
+
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -21,5 +24,5 @@ public interface SqlExecutor<T> {
      * @return  T the type of returning instance
      * @throws SQLException when there are some problems with dataBase connection
      */
-    T execute(PreparedStatement preparedStatement) throws SQLException;
+    T execute(PreparedStatement preparedStatement) throws SQLException, ExistException, NotExistException;
 }

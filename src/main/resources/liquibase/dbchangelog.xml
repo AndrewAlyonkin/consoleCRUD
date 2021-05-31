@@ -31,10 +31,17 @@
                 <constraints nullable="false"/>
             </column>
             <column name="update_time" type="TIMESTAMP"/>
-            <column name="writer_id" type="BIGINT">
-                <constraints foreignKeyName="fk_writer_id" references="writers(id)" nullable="false"/>
-            </column>
+            <column name="writer_id" type="BIGINT"/>
         </createTable>
+        <addForeignKeyConstraint  baseColumnNames="writer_id"
+                                  baseTableName="posts"
+                                  baseTableSchemaName="public"
+                                  constraintName="fk_writer_id"
+                                  onDelete="CASCADE"
+                                  onUpdate="RESTRICT"
+                                  referencedColumnNames="id"
+                                  referencedTableName="writers"
+                                  referencedTableSchemaName="public"/>
         <rollback>
             <dropTable tableName="posts"/>
         </rollback>
@@ -48,10 +55,17 @@
             <column name="name" type="VARCHAR">
                 <constraints nullable="false"/>
             </column>
-            <column name="writer_id" type="BIGINT">
-                <constraints foreignKeyName="fk_post_id" references="posts(id)" nullable="false"/>
-            </column>
+            <column name="post_id" type="BIGINT"/>
         </createTable>
+        <addForeignKeyConstraint  baseColumnNames="post_id"
+                                  baseTableName="labels"
+                                  baseTableSchemaName="public"
+                                  constraintName="fk_post_id"
+                                  onDelete="CASCADE"
+                                  onUpdate="RESTRICT"
+                                  referencedColumnNames="id"
+                                  referencedTableName="posts"
+                                  referencedTableSchemaName="public"/>
         <rollback>
             <dropTable tableName="labels"/>
         </rollback>
