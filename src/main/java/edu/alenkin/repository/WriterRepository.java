@@ -61,7 +61,6 @@ public interface WriterRepository {
 
     /**
      * Clear all writers data from data storage
-     * @return
      */
-    boolean clear();
+    void clear();
 }

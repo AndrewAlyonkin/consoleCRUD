@@ -4,9 +4,12 @@ import edu.alenkin.exception.ExistException;
 import edu.alenkin.exception.NotExistException;
 import edu.alenkin.model.Label;
 import edu.alenkin.model.Post;
+import edu.alenkin.model.PostStatus;
+import edu.alenkin.model.Writer;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,12 +26,21 @@ import java.util.stream.Collectors;
 public class PostRepositoryImpl extends Repository implements PostRepository {
 
     @Override
-    public void addPost(Post post) throws ExistException {
-
+    public void addPost(Post post, long writerId) {
+        dbWorker.executePrepared("INSERT INTO posts (id, content, create_time, status, update_time, writer_id)" +
+                "VALUES (?, ?, ?, ?, ?, ?)", preparedStatement -> {
+            preparedStatement.setLong(1, post.getId());
+            preparedStatement.setString(2, post.getContent());
+            preparedStatement.setString(3, post.getStatus().name());
+            preparedStatement.setTimestamp(4, Timestamp.valueOf(post.getCreated()));
+            preparedStatement.setTimestamp(5, Timestamp.valueOf(post.getUpdated()));
+            preparedStatement.setLong(6, writerId);
+            return null;
+        });
     }
 
     @Override
-    public void removePost(Post post) throws NotExistException {
+    public void removePost(Post post) {
         dbWorker.executePrepared("DELETE FROM posts WHERE id=?",
                 preparedStatement -> {
                     preparedStatement.setLong(1, post.getId());
@@ -41,13 +53,8 @@ public class PostRepositoryImpl extends Repository implements PostRepository {
     }
 
     @Override
-    public void updatePost(Post post) throws NotExistException {
-
-    }
-
-    @Override
     public List<Post> getPostsByWriterId(long id) {
-        List<Post> resultPosts = dbWorker.executeQuery("SELECT * FROM posts WHERE writer_id=?",
+        List<Post> resultPosts = dbWorker.executePrepared("SELECT * FROM posts WHERE writer_id=?",
                 preparedStatement -> {
                     preparedStatement.setLong(1, id);
                     ResultSet resultSet = preparedStatement.executeQuery();
@@ -57,17 +64,37 @@ public class PostRepositoryImpl extends Repository implements PostRepository {
     }
 
     @Override
-    public List<Post> getAllPosts() {
-        List<Post> resultPosts = dbWorker.executeQuery("SELECT * FROM posts", preparedStatement -> {
-            ResultSet resultSet = preparedStatement.executeQuery();
-            return parsePostResultSet(resultSet);
+    public void updatePostsForWriter(Writer writer) {
+        dbWorker.executePrepared("UPDATE posts SET content=?, status=?, update_time=? WHERE id=?", preparedStatement -> {
+            boolean needUpdate = false;
+            for (Post post : writer.getPosts()) {
+                if (post.getCreated() != post.getUpdated()) {
+                    preparedStatement.setString(1, post.getContent());
+                    preparedStatement.setString(2, post.getStatus().name());
+                    preparedStatement.setTimestamp(3, Timestamp.valueOf(post.getUpdated()));
+                    preparedStatement.setLong(4, post.getId());
+                    preparedStatement.addBatch();
+                    needUpdate = true;
+                }
+            }
+            if (needUpdate) {
+                preparedStatement.executeUpdate();
+            }
+            return null;
         });
-        return fillPostsLabels(resultPosts);
+
+        LabelRepository labelRepository = new LabelRepositoryImpl();
+        labelRepository.updateLabelsForWriter(writer);
     }
 
     @Override
-    public boolean clear() {
-        return dbWorker.execute("DELETE FROM posts");
+    public void clearForWriter(long writerId) {
+        dbWorker.executePrepared("DELETE FROM posts WHERE writer_id=?",
+                preparedStatement -> {
+                    preparedStatement.setLong(1, writerId);
+                    preparedStatement.executeUpdate();
+                    return null;
+                });
     }
 
     /**
@@ -80,8 +107,10 @@ public class PostRepositoryImpl extends Repository implements PostRepository {
     private List<Post> parsePostResultSet(ResultSet resultSet) throws SQLException {
         List<Post> posts = new ArrayList<>();
         while (resultSet.next()) {
-            posts.add(new Post(resultSet.getLong("id"), resultSet.getString("content"),
-                    dbWorker.convertToLocalDateTime(resultSet.getTimestamp("update_time"))));
+            Post currentPost = new Post(resultSet.getLong("id"), resultSet.getString("content"),
+                    dbWorker.convertToLocalDateTime(resultSet.getTimestamp("update_time")));
+            currentPost.setStatus(switchStatus(resultSet.getString("status")));
+            posts.add(currentPost);
         }
         return posts;
     }
@@ -100,5 +129,15 @@ public class PostRepositoryImpl extends Repository implements PostRepository {
         LabelRepositoryImpl labelRepository = new LabelRepositoryImpl();
         return resultPosts.stream().peek(post -> post.setLabels(labelRepository.getLabelsByPostId(post.getId())))
                 .collect(Collectors.toList());
+    }
+
+    private PostStatus switchStatus(String statusFromDb) {
+        switch (statusFromDb) {
+            case "ACTIVE":
+                return PostStatus.ACTIVE;
+            case "DELETED":
+                return PostStatus.DELETED;
+        }
+        return PostStatus.UNDER_REVIEW;
     }
 }

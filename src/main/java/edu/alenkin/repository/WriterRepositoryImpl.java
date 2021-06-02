@@ -2,6 +2,7 @@ package edu.alenkin.repository;
 
 import edu.alenkin.exception.ExistException;
 import edu.alenkin.exception.NotExistException;
+import edu.alenkin.model.Label;
 import edu.alenkin.model.Post;
 import edu.alenkin.model.Writer;
 
@@ -23,9 +24,11 @@ import java.util.stream.Collectors;
  * {@link edu.alenkin.model.Writer} entity in storage
  */
 public class WriterRepositoryImpl extends Repository implements WriterRepository {
+
     @Override
-    public void addWriter(Writer writer) throws ExistException {
+    public void addWriter(Writer writer) {
         dbWorker.executeTransactional(connection -> {
+            //insert writer to writers table
             PreparedStatement preparedStatement = connection.prepareStatement(
                     "INSERT INTO writers " +
                             "(id, first_name, last_name) " +
@@ -35,27 +38,43 @@ public class WriterRepositoryImpl extends Repository implements WriterRepository
             preparedStatement.setString(3, writer.getLastName());
             preparedStatement.executeUpdate();
 
+            //insert writers posts to posts table
             PreparedStatement postsStatement = connection.prepareStatement(
                     "INSERT INTO posts" +
-                            "(id, content, create_time, update_time, writer_id)" +
-                            "VALUES (?, ?, ?, ?, ?)");
-            for (Post p: writer.getPosts()) {
-                postsStatement.setLong(1, p.getId());
-                postsStatement.setString(2, p.getContent());
-                postsStatement.setTimestamp(3, Timestamp.valueOf(p.getCreated()));
-                postsStatement.setTimestamp(4, Timestamp.valueOf(p.getUpdated()));
-                postsStatement.setLong(5, writer.getId());
+                            "(id, content, status, create_time, update_time, writer_id)" +
+                            "VALUES (?, ?, ?, ?, ?, ?)");
+            for (Post post : writer.getPosts()) {
+                postsStatement.setLong(1, post.getId());
+                postsStatement.setString(2, post.getContent());
+                postsStatement.setString(3, post.getStatus().name());
+                postsStatement.setTimestamp(4, Timestamp.valueOf(post.getCreated()));
+                postsStatement.setTimestamp(5, Timestamp.valueOf(post.getUpdated() == null
+                        ? post.getCreated()
+                        : post.getUpdated()));
+                postsStatement.setLong(6, writer.getId());
                 postsStatement.addBatch();
             }
             postsStatement.executeUpdate();
 
+            //insert labels for each writers post to labels table
+            PreparedStatement labelsStatement = connection.prepareStatement(
+                    "INSERT INTO labels (id, name, post_id)" +
+                            "VALUES (?,?,?)");
+            for (Post p : writer.getPosts()) {
+                for (Label l : p.getLabels()) {
+                    labelsStatement.setLong(1, l.getId());
+                    labelsStatement.setString(2, l.getName());
+                    labelsStatement.setLong(3, p.getId());
+                    labelsStatement.addBatch();
+                }
+            }
+            labelsStatement.executeUpdate();
             return null;
         });
-
     }
 
     @Override
-    public void removeWriter(Writer writer) throws NotExistException {
+    public void removeWriter(Writer writer) {
         dbWorker.executePrepared("DELETE FROM writers WHERE id=?",
                 preparedStatement -> {
                     preparedStatement.setLong(1, writer.getId());
@@ -68,8 +87,18 @@ public class WriterRepositoryImpl extends Repository implements WriterRepository
     }
 
     @Override
-    public void updateWriter(Writer writer) throws NotExistException {
+    public void updateWriter(Writer writer) {
+        dbWorker.executeTransactional(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement("UPDATE writers" +
+                    " SET first_name=?, last_name=? WHERE id=?");
+            preparedStatement.setString(1, writer.getFirstName());
+            preparedStatement.setString(2, writer.getLastName());
+            preparedStatement.setLong(3, writer.getId());
+            return null;
+        });
 
+        PostRepository postRepository = new PostRepositoryImpl();
+        postRepository.updatePostsForWriter(writer);
     }
 
     @Override
@@ -78,7 +107,6 @@ public class WriterRepositoryImpl extends Repository implements WriterRepository
                 preparedStatement -> {
                     preparedStatement.setLong(1, id);
                     ResultSet resultSet = preparedStatement.executeQuery();
-
 
                     if (resultSet.next()) {
                         PostRepositoryImpl postRepository = new PostRepositoryImpl();
@@ -95,7 +123,7 @@ public class WriterRepositoryImpl extends Repository implements WriterRepository
 
     @Override
     public List<Writer> getAllWriters() {
-        List<Writer> resultWriters = dbWorker.executeQuery("SELECT * FROM writers", preparedStatement -> {
+        List<Writer> resultWriters = dbWorker.executePrepared("SELECT * FROM writers", preparedStatement -> {
             ResultSet resultSet = preparedStatement.executeQuery();
             return parseWritersResultSet(resultSet);
         });
@@ -103,8 +131,8 @@ public class WriterRepositoryImpl extends Repository implements WriterRepository
     }
 
     @Override
-    public boolean clear() {
-        return dbWorker.execute("DELETE FROM writers");
+    public void clear() {
+        dbWorker.execute("DELETE FROM writers");
     }
 
     /**
@@ -136,11 +164,17 @@ public class WriterRepositoryImpl extends Repository implements WriterRepository
         if (resultWriters == null || resultWriters.isEmpty()) {
             return null;
         }
-        PostRepositoryImpl postRepository = new PostRepositoryImpl();
+        PostRepository postRepository = new PostRepositoryImpl();
         return resultWriters.stream().peek(writer -> setWriterPosts(writer, postRepository))
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Util method for setting current writer posts and labels from dataBase
+     *
+     * @param writer         the current writer for filling its posts
+     * @param postRepository the {@link PostRepository} object for access to writers posts
+     */
     private void setWriterPosts(Writer writer, PostRepository postRepository) {
         writer.setPosts(postRepository.getPostsByWriterId(writer.getId()));
     }

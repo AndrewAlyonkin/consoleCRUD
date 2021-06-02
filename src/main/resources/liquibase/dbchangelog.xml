@@ -30,6 +30,9 @@
             <column name="create_time" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
+            <column name="status" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
             <column name="update_time" type="TIMESTAMP"/>
             <column name="writer_id" type="BIGINT"/>
         </createTable>

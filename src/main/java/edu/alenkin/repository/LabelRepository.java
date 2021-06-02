@@ -8,6 +8,7 @@ package edu.alenkin.repository;
 import edu.alenkin.exception.ExistException;
 import edu.alenkin.exception.NotExistException;
 import edu.alenkin.model.Label;
+import edu.alenkin.model.Writer;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public interface LabelRepository {
      * @param label the new {@link edu.alenkin.model.Label} for saving in storage
      * @throws ExistException if current Label is already exists in storage
      */
-    void addLabel(Label label) throws ExistException;
+    void addLabel(Label label, long postId) throws ExistException;
 
     /**
      * Takes {@link edu.alenkin.model.Label label}, finds it in storage and deletes it
@@ -54,16 +55,15 @@ public interface LabelRepository {
     List<Label> getLabelsByPostId(long id);
 
     /**
-     * Method for getting all {@link edu.alenkin.model.Label labels} from storage
-     *
-     * @return List of {@link edu.alenkin.model.Label labels}
-     * or null if {@link edu.alenkin.model.Label labels} storage is empty
+     * Clear all Labels  for current post from data storage
+     * @param postId id of post for clearing it labels
      */
-    List<Label> getAllLabels();
+    void clearForPost(long postId);
 
     /**
-     * Clear all Labels data fom data storage
-     * @return
+     * Takes {@link edu.alenkin.model.Writer writer}
+     * looking it posts and update labels for updated posts.
+     * @param writer the owner of post for updating labels
      */
-    boolean clear();
+    void updateLabelsForWriter(Writer writer);
 }

@@ -3,6 +3,8 @@ package edu.alenkin.repository;
 import edu.alenkin.exception.ExistException;
 import edu.alenkin.exception.NotExistException;
 import edu.alenkin.model.Label;
+import edu.alenkin.model.Post;
+import edu.alenkin.model.Writer;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,60 +23,82 @@ import java.util.List;
 public class LabelRepositoryImpl extends Repository implements LabelRepository {
 
     @Override
-    public void addLabel(Label label) throws ExistException {
-
-
+    public void addLabel(Label label, long postId) {
+        dbWorker.executePrepared("INSERT INTO labels (id, name, post_id) VALUES(?, ?, ?)",
+                preparedStatement -> {
+                    preparedStatement.setLong(1, label.getId());
+                    preparedStatement.setString(2, label.getName());
+                    preparedStatement.setLong(3, postId);
+                    return null;
+                });
     }
 
+
     @Override
-    public void removeLabel(Label label) throws NotExistException {
+    public void removeLabel(Label label) {
         dbWorker.executePrepared("DELETE FROM labels WHERE id=?",
                 preparedStatement -> {
                     preparedStatement.setLong(1, label.getId());
-                    int result = preparedStatement.executeUpdate();
-                    if (result == 0) {
-                        throw new NotExistException();
-                    }
+                    preparedStatement.executeUpdate();
                     return null;
                 });
     }
 
     @Override
-    public void updateLabel(Label label) throws NotExistException {
-
+    public void updateLabel(Label label) {
+        dbWorker.executePrepared("UPDATE labels SET name=? WHERE id=?",
+                preparedStatement -> {
+                    preparedStatement.setString(1, label.getName());
+                    preparedStatement.setLong(2, label.getId());
+                    preparedStatement.executeUpdate();
+                    return null;
+                });
     }
 
     @Override
     public List<Label> getLabelsByPostId(long id) {
-        return dbWorker.executeQuery("SELECT * FROM labels WHERE post_id=? ", preparedStatement -> {
+        return dbWorker.executePrepared("SELECT * FROM labels WHERE post_id=? ", preparedStatement -> {
             preparedStatement.setLong(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-           return parseLabelResultSet(resultSet);
-        });
-    }
-
-    @Override
-    public List<Label> getAllLabels() {
-        return dbWorker.executeQuery("SELECT * FROM labels", preparedStatement -> {
             ResultSet resultSet = preparedStatement.executeQuery();
             return parseLabelResultSet(resultSet);
         });
     }
 
     @Override
-    public boolean clear() {
-        return dbWorker.execute("DELETE FROM labels");
+    public void clearForPost(long postId) {
+        dbWorker.executePrepared("DELETE FROM labels WHERE post_id=?",
+                preparedStatement -> {
+                    preparedStatement.setLong(1, postId);
+                    preparedStatement.executeUpdate();
+                    return null;
+                });
+    }
+
+    public void updateLabelsForWriter(Writer writer) {
+        dbWorker.executePrepared("UPDATE labels SET name=? WHERE id=?", preparedStatement -> {
+            for (Post post : writer.getPosts()) {
+                if (post.getCreated() != post.getUpdated()) {
+                    for (Label label : post.getLabels()) {
+                        preparedStatement.setString(1, label.getName());
+                        preparedStatement.setLong(2, label.getId());
+                    }
+                    preparedStatement.addBatch();
+                }
+            }
+            preparedStatement.executeUpdate();
+            return null;
+        });
     }
 
     /**
      * Util method for parsing result {@link ResultSet resultset} of prepared statement execution
      *
-      * @param resultSet the resultSet, contains data about {@link Label label} from dataBase, for parsing
+     * @param resultSet the resultSet, contains data about {@link Label label} from dataBase, for parsing
      * @return list of {@link Label labels}, parsed from current resultSet
      * @throws SQLException
      */
     private List<Label> parseLabelResultSet(ResultSet resultSet) throws SQLException {
-        List<Label> labels = new ArrayList();
+        List<Label> labels = new ArrayList<>();
         while (resultSet.next()) {
             labels.add(new Label(resultSet.getLong("id"), resultSet.getString("name")));
         }

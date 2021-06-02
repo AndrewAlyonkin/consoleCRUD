@@ -15,7 +15,7 @@ import java.sql.SQLException;
  * Super repository class where the connection to the database is configured and the same
  * {@link edu.alenkin.dataBaseUtil.DBWorker database worker} for child repositories is initialized
  */
-public class Repository {
+public abstract class Repository {
     private static Config config = Config.getInstance();
     protected DBWorker dbWorker;
 

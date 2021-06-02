@@ -7,7 +7,6 @@ PostStatus (enum ACTIVE, UNDER_REVIEW, DELETED)
 Выполнено в соответствии с патерном MVC;
 Для миграции БД используется Liquibase - https://www.liquibase.org/ ;
 Сервисный слой приложения покрыт юнит тестами (junit + mockito);
-Слой доступа к БД покрыт юнит-тестами(junit);
 Проект собирается через Maven;
 
 Стек технологий: Java, MySQL, JDBC, Maven, Liquibase, JUnit, Mockito.
@@ -27,7 +26,7 @@ PostStatus (enum ACTIVE, UNDER_REVIEW, DELETED)
     classpath=название jar-файла - драйвера (в формате *****.jar ), зависимость от которого указана в pom.xml
 
 3. После сборки проекта выполнить команду " mvn liquibase:update " для создания в базе данных необходимых
-для работы приложения таблиц с помощью Liquibase.
+для работы приложения таблиц и зависимостей с помощью Liquibase.
 4. При необходимости Liquibase позволяет откатить изменения, внесенные в БД командой " mvn liquibase:rollback -Dliquibase.rollbackCount=3 "
 
 

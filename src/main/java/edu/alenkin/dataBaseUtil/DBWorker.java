@@ -87,15 +87,15 @@ public class DBWorker {
      * @param executor the lambda-expression for setting {@link PreparedStatement} parameters and it execution
      * @return {@link List} of required T objects
      */
-    public <T> List<T> executeQuery(String query, SqlExecutor<List<T>> executor) {
-        try (Connection connection = connectionFactory.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            return executor.execute(preparedStatement);
-        } catch (SQLException | NotExistException | ExistException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+//    public <T> List<T> executeQuery(String query, SqlExecutor<List<T>> executor) {
+//        try (Connection connection = connectionFactory.getConnection()) {
+//            PreparedStatement preparedStatement = connection.prepareStatement(query);
+//            return executor.execute(preparedStatement);
+//        } catch (SQLException | NotExistException | ExistException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
 
     /**
      * Util method for converting SQL timestamps from database to java {@link LocalDateTime}

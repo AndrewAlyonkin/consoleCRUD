@@ -1,5 +1,6 @@
 package edu.alenkin.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,7 +16,7 @@ public class Writer {
     private long id;
     private String firstName;
     private String lastName;
-    private List<Post> posts;
+    private List<Post> posts = new ArrayList<>();
 
     public Writer(long id, String firstName, String lastName) {
         this.id = id;

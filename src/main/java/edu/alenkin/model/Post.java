@@ -1,6 +1,7 @@
 package edu.alenkin.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,12 +18,19 @@ public class Post {
     private String content;
     private LocalDateTime created;
     private LocalDateTime updated;
-    private List<Label> labels;
+    private List<Label> labels = new ArrayList<>();
+    private PostStatus status;
 
     public Post(long id, String content, LocalDateTime created) {
         this.id = id;
         this.content = content;
         this.created = created;
+        this.status = PostStatus.UNDER_REVIEW;
+        this.updated = LocalDateTime.now();
+    }
+
+    public Post(long id, String content) {
+        this(id, content, LocalDateTime.now());
     }
 
     /**
@@ -48,6 +56,7 @@ public class Post {
 
     public void setContent(String content) {
         this.content = content;
+        this.updated = LocalDateTime.now();
     }
 
     public LocalDateTime getCreated() {
@@ -72,5 +81,13 @@ public class Post {
 
     public void setLabels(List<Label> labels) {
         this.labels = labels;
+    }
+
+    public PostStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PostStatus status) {
+        this.status = status;
     }
 }
