@@ -49,7 +49,7 @@ public interface WriterRepository {
      * @return {@link edu.alenkin.model.Writer writer} by it id
      * or null if writer doesnt exist in storage
      */
-    Writer getWriterById(long id);
+    Writer getWriterById(long id) throws NotExistException;
 
     /**
      * Method for getting of all {@link edu.alenkin.model.Writer writers} from storage

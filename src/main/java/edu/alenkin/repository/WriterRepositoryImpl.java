@@ -102,7 +102,7 @@ public class WriterRepositoryImpl extends Repository implements WriterRepository
     }
 
     @Override
-    public Writer getWriterById(long id) {
+    public Writer getWriterById(long id) throws NotExistException {
         return dbWorker.executePrepared("SELECT * FROM writers WHERE id=?",
                 preparedStatement -> {
                     preparedStatement.setLong(1, id);
