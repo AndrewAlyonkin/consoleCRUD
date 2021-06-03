@@ -18,7 +18,11 @@ import java.util.List;
  * The base implementation of {@link WriterService} for manipulating {@link Writer} data in repository.
  */
 public class WriterServiceImpl implements WriterService {
-    private WriterRepository wRepo = new WriterRepositoryImpl();
+    private WriterRepository wRepo;
+
+    public WriterServiceImpl() {
+        this.wRepo = new WriterRepositoryImpl();
+    }
 
     @Override
     public void addWriter(Writer writer) throws ExistException, SQLException {

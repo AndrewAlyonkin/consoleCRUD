@@ -2,6 +2,7 @@ package edu.alenkin.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Alenkin Andrew
@@ -75,5 +76,18 @@ public class Writer {
         return "| " + String.format("%-5s", this.id) + "| " +
                 String.format("%-15s", this.firstName) + "| " +
                 String.format("%-15s", this.lastName) + "|";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Writer writer = (Writer) o;
+        return id == writer.id && Objects.equals(firstName, writer.firstName) && Objects.equals(lastName, writer.lastName) && Objects.equals(posts, writer.posts);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firstName, lastName, posts);
     }
 }

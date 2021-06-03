@@ -18,7 +18,11 @@ import java.sql.SQLException;
  * The base implementation of {@link LabelService} for manipulating {@link Label} data in repository.
  */
 public class LabelServiceImpl implements LabelService{
-    private LabelRepository lRepo = new LabelRepositoryImpl();
+    private LabelRepository lRepo;
+
+    public LabelServiceImpl() {
+        this.lRepo = new LabelRepositoryImpl();
+    }
 
     @Override
     public void addLabel(Label label, long postId) throws SQLException, NotExistException, ExistException {

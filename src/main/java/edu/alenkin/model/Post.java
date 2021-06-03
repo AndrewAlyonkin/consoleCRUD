@@ -3,6 +3,7 @@ package edu.alenkin.model;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Alenkin Andrew
@@ -25,7 +26,6 @@ public class Post {
         this.id = id;
         this.content = content;
         this.created = created;
-        this.status = PostStatus.UNDER_REVIEW;
         this.updated = LocalDateTime.now();
     }
 
@@ -109,4 +109,16 @@ public class Post {
                 " |";
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Post post = (Post) o;
+        return id == post.id && Objects.equals(content, post.content) && created.equals(post.created) && updated.equals(post.updated) && Objects.equals(labels, post.labels) && status == post.status;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, content, created, updated, labels, status);
+    }
 }

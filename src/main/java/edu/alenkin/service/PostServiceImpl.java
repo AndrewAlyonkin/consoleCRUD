@@ -18,7 +18,11 @@ import java.sql.SQLException;
  * The base implementation of {@link PostService} for manipulating {@link Post} data in repository.
  */
 public class PostServiceImpl implements PostService {
-    private PostRepository pRepo = new PostRepositoryImpl();
+    private PostRepository pRepo;
+
+    public PostServiceImpl() {
+        this.pRepo = new PostRepositoryImpl();
+    }
 
     @Override
     public void removePost(long postId) throws SQLException, NotExistException, ExistException {

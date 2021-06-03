@@ -28,5 +28,5 @@ PostStatus (enum ACTIVE, UNDER_REVIEW, DELETED)
 3. После сборки проекта выполнить команду " mvn liquibase:update " для создания в базе данных необходимых
 для работы приложения таблиц и зависимостей с помощью Liquibase.
 4. При необходимости Liquibase позволяет откатить изменения, внесенные в БД командой " mvn liquibase:rollback -Dliquibase.rollbackCount=3 "
-
+5. Для старта программы запустить метод main( ) в классе Console.
 
