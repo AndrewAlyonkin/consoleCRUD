@@ -10,6 +10,7 @@ import edu.alenkin.exception.NotExistException;
 import edu.alenkin.model.Post;
 import edu.alenkin.model.Writer;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -26,15 +27,15 @@ public interface PostRepository {
      * @param writerId the id of {@link Writer} who owns this post
      * @throws ExistException if current post is already exist in storage
      */
-    void addPost(Post post, long writerId) throws ExistException;
+    void addPost(Post post, long writerId) throws ExistException, SQLException, NotExistException;
 
     /**
      * Takes {@link edu.alenkin.model.Post post}, finds it in storage and deletes it
      *
-     * @param post the {@link edu.alenkin.model.Post post} for deleting from storage
+     * @param postId the id of {@link edu.alenkin.model.Post post} for deleting from storage
      * @throws NotExistException if current post doesnt exist in storage
      */
-    void removePost(Post post) throws NotExistException;
+    void removePost(long postId) throws NotExistException, SQLException, ExistException;
 
     /**
      * Takes the id of {@link edu.alenkin.model.Post post} and returns it from storage
@@ -43,16 +44,12 @@ public interface PostRepository {
      * @return {@link edu.alenkin.model.Post post} with current id from storage
      * or null if post doesnt exist in storage
      */
-    List<Post> getPostsByWriterId(long writerId);
+    List<Post> getPostsByWriterId(long writerId) throws SQLException, NotExistException, ExistException;
 
     /**
      * Takes existing writer and update its posts
      * @param writer the owner of posts for updating
      */
-    void updatePostsForWriter(Writer writer);
+    void updatePostsForWriter(Writer writer) throws SQLException, NotExistException, ExistException;
 
-    /**
-     * Clear all Posts for current writer from data storage
-     */
-    void clearForWriter(long writerId);
 }

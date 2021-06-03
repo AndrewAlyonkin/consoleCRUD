@@ -29,8 +29,15 @@ public class Post {
         this.updated = LocalDateTime.now();
     }
 
-    public Post(long id, String content) {
-        this(id, content, LocalDateTime.now());
+    public Post(String content, LocalDateTime created, PostStatus status) {
+        this.content = content;
+        this.created = created;
+        this.status = status;
+        this.updated = LocalDateTime.now();
+    }
+
+    public Post(String content, PostStatus status) {
+        this(content, LocalDateTime.now(), status);
     }
 
     /**
@@ -89,5 +96,17 @@ public class Post {
 
     public void setStatus(PostStatus status) {
         this.status = status;
+        this.updated = LocalDateTime.now();
     }
+
+    @Override
+    public String toString() {
+        return "| " + String.format("%-5s", this.id) +
+                "| " + String.format("%-25s", this.content) +
+                "| " + String.format("%-15s", this.created) +
+                "| " + String.format("%-15s", this.updated) +
+                "| " + String.format("%-20s", this.status.getStatus()) +
+                " |";
+    }
+
 }

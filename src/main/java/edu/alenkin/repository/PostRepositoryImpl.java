@@ -26,24 +26,24 @@ import java.util.stream.Collectors;
 public class PostRepositoryImpl extends Repository implements PostRepository {
 
     @Override
-    public void addPost(Post post, long writerId) {
-        dbWorker.executePrepared("INSERT INTO posts (id, content, create_time, status, update_time, writer_id)" +
-                "VALUES (?, ?, ?, ?, ?, ?)", preparedStatement -> {
-            preparedStatement.setLong(1, post.getId());
-            preparedStatement.setString(2, post.getContent());
-            preparedStatement.setString(3, post.getStatus().name());
-            preparedStatement.setTimestamp(4, Timestamp.valueOf(post.getCreated()));
-            preparedStatement.setTimestamp(5, Timestamp.valueOf(post.getUpdated()));
-            preparedStatement.setLong(6, writerId);
+    public void addPost(Post post, long writerId) throws SQLException, NotExistException, ExistException {
+        dbWorker.executePrepared("INSERT INTO posts (content, status, create_time, update_time, writer_id)" +
+                "VALUES (?, ?, ?, ?, ?)", preparedStatement -> {
+            preparedStatement.setString(1, post.getContent());
+            preparedStatement.setString(2, post.getStatus().name());
+            preparedStatement.setTimestamp(3, Timestamp.valueOf(post.getCreated()));
+            preparedStatement.setTimestamp(4, Timestamp.valueOf(post.getUpdated()));
+            preparedStatement.setLong(5, writerId);
+            preparedStatement.executeUpdate();
             return null;
         });
     }
 
     @Override
-    public void removePost(Post post) {
+    public void removePost(long postId) throws SQLException, NotExistException, ExistException {
         dbWorker.executePrepared("DELETE FROM posts WHERE id=?",
                 preparedStatement -> {
-                    preparedStatement.setLong(1, post.getId());
+                    preparedStatement.setLong(1, postId);
                     int result = preparedStatement.executeUpdate();
                     if (result == 0) {
                         throw new NotExistException();
@@ -53,7 +53,7 @@ public class PostRepositoryImpl extends Repository implements PostRepository {
     }
 
     @Override
-    public List<Post> getPostsByWriterId(long id) {
+    public List<Post> getPostsByWriterId(long id) throws SQLException, NotExistException, ExistException {
         List<Post> resultPosts = dbWorker.executePrepared("SELECT * FROM posts WHERE writer_id=?",
                 preparedStatement -> {
                     preparedStatement.setLong(1, id);
@@ -64,37 +64,30 @@ public class PostRepositoryImpl extends Repository implements PostRepository {
     }
 
     @Override
-    public void updatePostsForWriter(Writer writer) {
-        dbWorker.executePrepared("UPDATE posts SET content=?, status=?, update_time=? WHERE id=?", preparedStatement -> {
-            boolean needUpdate = false;
-            for (Post post : writer.getPosts()) {
-                if (post.getCreated() != post.getUpdated()) {
-                    preparedStatement.setString(1, post.getContent());
-                    preparedStatement.setString(2, post.getStatus().name());
-                    preparedStatement.setTimestamp(3, Timestamp.valueOf(post.getUpdated()));
-                    preparedStatement.setLong(4, post.getId());
-                    preparedStatement.addBatch();
-                    needUpdate = true;
+    public void updatePostsForWriter(Writer writer) throws SQLException, NotExistException, ExistException {
+        List<Post> posts = writer.getPosts();
+        if (posts != null && !posts.isEmpty()) {
+            dbWorker.executePrepared("UPDATE posts SET content=?, status=?, update_time=? WHERE id=?", preparedStatement -> {
+                boolean needUpdate = false;
+                for (Post post : posts) {
+                    if (post.getCreated() != post.getUpdated()) {
+                        preparedStatement.setString(1, post.getContent());
+                        preparedStatement.setString(2, post.getStatus().name());
+                        preparedStatement.setTimestamp(3, Timestamp.valueOf(post.getUpdated()));
+                        preparedStatement.setLong(4, post.getId());
+                        preparedStatement.addBatch();
+                        needUpdate = true;
+                    }
                 }
-            }
-            if (needUpdate) {
-                preparedStatement.executeUpdate();
-            }
-            return null;
-        });
-
-        LabelRepository labelRepository = new LabelRepositoryImpl();
-        labelRepository.updateLabelsForWriter(writer);
-    }
-
-    @Override
-    public void clearForWriter(long writerId) {
-        dbWorker.executePrepared("DELETE FROM posts WHERE writer_id=?",
-                preparedStatement -> {
-                    preparedStatement.setLong(1, writerId);
+                if (needUpdate) {
                     preparedStatement.executeUpdate();
-                    return null;
-                });
+                }
+                return null;
+            });
+
+            LabelRepository labelRepository = new LabelRepositoryImpl();
+            labelRepository.updateLabelsForWriter(writer);
+        }
     }
 
     /**
@@ -122,13 +115,17 @@ public class PostRepositoryImpl extends Repository implements PostRepository {
      * @return the list of {@link Post posts} with filled lists of it labels
      * or null if input list is empty
      */
-    private List<Post> fillPostsLabels(List<Post> resultPosts) {
+    private List<Post> fillPostsLabels(List<Post> resultPosts) throws SQLException, NotExistException, ExistException {
         if (resultPosts == null || resultPosts.isEmpty()) {
             return null;
         }
         LabelRepositoryImpl labelRepository = new LabelRepositoryImpl();
-        return resultPosts.stream().peek(post -> post.setLabels(labelRepository.getLabelsByPostId(post.getId())))
-                .collect(Collectors.toList());
+        List<Post> list = new ArrayList<>();
+        for (Post post : resultPosts) {
+            post.setLabels(labelRepository.getLabelsByPostId(post.getId()));
+            list.add(post);
+        }
+        return list;
     }
 
     private PostStatus switchStatus(String statusFromDb) {

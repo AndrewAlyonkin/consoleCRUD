@@ -9,4 +9,7 @@ package edu.alenkin.exception;
  * Exception that indicates that current object is not exist in storage
  */
 public class NotExistException extends Exception{
+    public NotExistException() {
+        super("Такой записи не существует!");
+    }
 }

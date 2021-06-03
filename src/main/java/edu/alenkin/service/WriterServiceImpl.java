@@ -6,6 +6,7 @@ import edu.alenkin.model.Writer;
 import edu.alenkin.repository.WriterRepository;
 import edu.alenkin.repository.WriterRepositoryImpl;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -20,39 +21,28 @@ public class WriterServiceImpl implements WriterService {
     private WriterRepository wRepo = new WriterRepositoryImpl();
 
     @Override
-    public void addWriter(Writer writer) {
-        try {
+    public void addWriter(Writer writer) throws ExistException, SQLException {
             wRepo.addWriter(writer);
-        } catch (ExistException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
-    public Writer getWriter(long writerId) {
-        try {
+    public Writer getWriter(long writerId) throws SQLException, NotExistException, ExistException {
             return wRepo.getWriterById(writerId);
-        } catch (NotExistException e) {
-            return null;
-        }
     }
 
     @Override
-    public void removeWriter(Writer writer) {
-        try {
+    public void removeWriter(Writer writer) throws SQLException, NotExistException, ExistException {
             wRepo.removeWriter(writer);
-        } catch (NotExistException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
-    public void updateWriter(Writer writer) {
-        try {
+    public void removeWriterById(long id) throws SQLException, NotExistException, ExistException {
+        wRepo.removeWriterById(id);
+    }
+
+    @Override
+    public void updateWriter(Writer writer) throws SQLException, NotExistException, ExistException {
             wRepo.updateWriter(writer);
-        } catch (NotExistException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -61,7 +51,7 @@ public class WriterServiceImpl implements WriterService {
     }
 
     @Override
-    public List<Writer> getAllWriters() {
+    public List<Writer> getAllWriters() throws SQLException, NotExistException, ExistException {
         return wRepo.getAllWriters();
     }
 }

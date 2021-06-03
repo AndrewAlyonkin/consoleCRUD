@@ -17,6 +17,9 @@ public class Label {
         this.id = id;
         this.name = name;
     }
+    public Label(String name) {
+        this.name = name;
+    }
 
     public long getId() {
         return id;
@@ -32,5 +35,11 @@ public class Label {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "| " + String.format("%-5s", this.id) + "| " +
+                String.format("%-15s", this.name) + "|";
     }
 }

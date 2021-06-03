@@ -26,58 +26,68 @@ import java.util.stream.Collectors;
 public class WriterRepositoryImpl extends Repository implements WriterRepository {
 
     @Override
-    public void addWriter(Writer writer) {
+    public void addWriter(Writer writer) throws SQLException {
         dbWorker.executeTransactional(connection -> {
             //insert writer to writers table
             PreparedStatement preparedStatement = connection.prepareStatement(
                     "INSERT INTO writers " +
-                            "(id, first_name, last_name) " +
-                            "VALUES (?, ?, ?);");
-            preparedStatement.setLong(1, writer.getId());
-            preparedStatement.setString(2, writer.getFirstName());
-            preparedStatement.setString(3, writer.getLastName());
+                            "(first_name, last_name) " +
+                            "VALUES (?, ?);");
+            preparedStatement.setString(1, writer.getFirstName());
+            preparedStatement.setString(2, writer.getLastName());
             preparedStatement.executeUpdate();
 
             //insert writers posts to posts table
+            List<Post> posts = writer.getPosts();
+            if (posts == null || posts.isEmpty()) {
+                return null;
+            }
             PreparedStatement postsStatement = connection.prepareStatement(
                     "INSERT INTO posts" +
-                            "(id, content, status, create_time, update_time, writer_id)" +
-                            "VALUES (?, ?, ?, ?, ?, ?)");
-            for (Post post : writer.getPosts()) {
-                postsStatement.setLong(1, post.getId());
-                postsStatement.setString(2, post.getContent());
-                postsStatement.setString(3, post.getStatus().name());
-                postsStatement.setTimestamp(4, Timestamp.valueOf(post.getCreated()));
-                postsStatement.setTimestamp(5, Timestamp.valueOf(post.getUpdated() == null
+                            "(content, status, create_time, update_time, writer_id)" +
+                            "VALUES (?, ?, ?, ?, ?)");
+            for (Post post : posts) {
+                postsStatement.setString(1, post.getContent());
+                postsStatement.setString(2, post.getStatus().name());
+                postsStatement.setTimestamp(3, Timestamp.valueOf(post.getCreated()));
+                postsStatement.setTimestamp(4, Timestamp.valueOf(post.getUpdated() == null
                         ? post.getCreated()
                         : post.getUpdated()));
-                postsStatement.setLong(6, writer.getId());
+                postsStatement.setLong(5, writer.getId());
                 postsStatement.addBatch();
             }
             postsStatement.executeUpdate();
 
             //insert labels for each writers post to labels table
+            boolean execute = false;
             PreparedStatement labelsStatement = connection.prepareStatement(
-                    "INSERT INTO labels (id, name, post_id)" +
-                            "VALUES (?,?,?)");
+                    "INSERT INTO labels (name, post_id)" +
+                            "VALUES (?,?)");
             for (Post p : writer.getPosts()) {
                 for (Label l : p.getLabels()) {
-                    labelsStatement.setLong(1, l.getId());
-                    labelsStatement.setString(2, l.getName());
-                    labelsStatement.setLong(3, p.getId());
+                    labelsStatement.setString(1, l.getName());
+                    labelsStatement.setLong(2, p.getId());
                     labelsStatement.addBatch();
+                    execute = true;
                 }
             }
-            labelsStatement.executeUpdate();
+            if (execute) {
+                labelsStatement.executeUpdate();
+            }
             return null;
         });
     }
 
     @Override
-    public void removeWriter(Writer writer) {
+    public void removeWriter(Writer writer) throws SQLException, NotExistException, ExistException {
+        removeWriterById(writer.getId());
+    }
+
+    @Override
+    public void removeWriterById(long id) throws SQLException, NotExistException, ExistException {
         dbWorker.executePrepared("DELETE FROM writers WHERE id=?",
                 preparedStatement -> {
-                    preparedStatement.setLong(1, writer.getId());
+                    preparedStatement.setLong(1, id);
                     int result = preparedStatement.executeUpdate();
                     if (result == 0) {
                         throw new NotExistException();
@@ -87,13 +97,14 @@ public class WriterRepositoryImpl extends Repository implements WriterRepository
     }
 
     @Override
-    public void updateWriter(Writer writer) {
+    public void updateWriter(Writer writer) throws SQLException, NotExistException, ExistException {
         dbWorker.executeTransactional(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("UPDATE writers" +
                     " SET first_name=?, last_name=? WHERE id=?");
             preparedStatement.setString(1, writer.getFirstName());
             preparedStatement.setString(2, writer.getLastName());
             preparedStatement.setLong(3, writer.getId());
+            preparedStatement.executeUpdate();
             return null;
         });
 
@@ -102,7 +113,7 @@ public class WriterRepositoryImpl extends Repository implements WriterRepository
     }
 
     @Override
-    public Writer getWriterById(long id) throws NotExistException {
+    public Writer getWriterById(long id) throws NotExistException, SQLException, ExistException {
         return dbWorker.executePrepared("SELECT * FROM writers WHERE id=?",
                 preparedStatement -> {
                     preparedStatement.setLong(1, id);
@@ -122,7 +133,7 @@ public class WriterRepositoryImpl extends Repository implements WriterRepository
     }
 
     @Override
-    public List<Writer> getAllWriters() {
+    public List<Writer> getAllWriters() throws SQLException, NotExistException, ExistException {
         List<Writer> resultWriters = dbWorker.executePrepared("SELECT * FROM writers", preparedStatement -> {
             ResultSet resultSet = preparedStatement.executeQuery();
             return parseWritersResultSet(resultSet);
@@ -134,6 +145,7 @@ public class WriterRepositoryImpl extends Repository implements WriterRepository
     public void clear() {
         dbWorker.execute("DELETE FROM writers");
     }
+
 
     /**
      * Util method for parsing result {@link ResultSet resultset} of prepared statement execution
@@ -160,13 +172,17 @@ public class WriterRepositoryImpl extends Repository implements WriterRepository
      * @return the list of {@link Writer writers} with filled lists of it posts
      * or null if input list is empty
      */
-    private List<Writer> fillWritersLabels(List<Writer> resultWriters) {
+    private List<Writer> fillWritersLabels(List<Writer> resultWriters) throws SQLException, NotExistException, ExistException {
         if (resultWriters == null || resultWriters.isEmpty()) {
             return null;
         }
         PostRepository postRepository = new PostRepositoryImpl();
-        return resultWriters.stream().peek(writer -> setWriterPosts(writer, postRepository))
-                .collect(Collectors.toList());
+        List<Writer> list = new ArrayList<>();
+        for (Writer writer : resultWriters) {
+            setWriterPosts(writer, postRepository);
+            list.add(writer);
+        }
+        return list;
     }
 
     /**
@@ -175,7 +191,7 @@ public class WriterRepositoryImpl extends Repository implements WriterRepository
      * @param writer         the current writer for filling its posts
      * @param postRepository the {@link PostRepository} object for access to writers posts
      */
-    private void setWriterPosts(Writer writer, PostRepository postRepository) {
+    private void setWriterPosts(Writer writer, PostRepository postRepository) throws SQLException, NotExistException, ExistException {
         writer.setPosts(postRepository.getPostsByWriterId(writer.getId()));
     }
 }

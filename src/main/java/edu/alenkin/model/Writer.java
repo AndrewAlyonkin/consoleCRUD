@@ -24,6 +24,11 @@ public class Writer {
         this.lastName = lastName;
     }
 
+    public Writer(String firstName, String lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
     /**
      * Takes a new {@link edu.alenkin.model.Post post} and adds it to the posts list
      *
@@ -67,10 +72,8 @@ public class Writer {
 
     @Override
     public String toString() {
-        return "Writer{" +
-                "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                '}';
+        return "| " + String.format("%-5s", this.id) + "| " +
+                String.format("%-15s", this.firstName) + "| " +
+                String.format("%-15s", this.lastName) + "|";
     }
 }

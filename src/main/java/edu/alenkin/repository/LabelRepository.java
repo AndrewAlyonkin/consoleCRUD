@@ -10,6 +10,7 @@ import edu.alenkin.exception.NotExistException;
 import edu.alenkin.model.Label;
 import edu.alenkin.model.Writer;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -25,25 +26,16 @@ public interface LabelRepository {
      * @param label the new {@link edu.alenkin.model.Label} for saving in storage
      * @throws ExistException if current Label is already exists in storage
      */
-    void addLabel(Label label, long postId) throws ExistException;
+    void addLabel(Label label, long postId) throws ExistException, SQLException, NotExistException;
 
     /**
      * Takes {@link edu.alenkin.model.Label label}, finds it in storage and deletes it
      *
-     * @param label the {@link edu.alenkin.model.Label} for deleting from storage
+     * @param labelId the id of {@link edu.alenkin.model.Label} for deleting from storage
      * @throws NotExistException if the {@link edu.alenkin.model.Label}
      *                           to be deleted is not present in storage
      */
-    void removeLabel(Label label) throws NotExistException;
-
-    /**
-     * Takes modified {@link edu.alenkin.model.Label} and update it in the storage
-     *
-     * @param label the modified {@link edu.alenkin.model.Label} for update
-     * @throws NotExistException if the {@link edu.alenkin.model.Label} for update
-     *                           is not exists in storage
-     */
-    void updateLabel(Label label) throws NotExistException;
+    void removeLabel(long labelId) throws NotExistException, SQLException, ExistException;
 
     /**
      * Takes id of {@link edu.alenkin.model.Label}, find it in storage and returns.
@@ -52,18 +44,12 @@ public interface LabelRepository {
      * @return {@link edu.alenkin.model.Label} by it id
      * or null if {@link edu.alenkin.model.Label} is not exist in storage
      */
-    List<Label> getLabelsByPostId(long id);
-
-    /**
-     * Clear all Labels  for current post from data storage
-     * @param postId id of post for clearing it labels
-     */
-    void clearForPost(long postId);
+    List<Label> getLabelsByPostId(long id) throws SQLException, NotExistException, ExistException;
 
     /**
      * Takes {@link edu.alenkin.model.Writer writer}
      * looking it posts and update labels for updated posts.
      * @param writer the owner of post for updating labels
      */
-    void updateLabelsForWriter(Writer writer);
+    void updateLabelsForWriter(Writer writer) throws SQLException, NotExistException, ExistException;
 }

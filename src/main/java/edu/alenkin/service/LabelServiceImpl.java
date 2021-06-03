@@ -7,6 +7,8 @@ import edu.alenkin.model.Post;
 import edu.alenkin.repository.LabelRepository;
 import edu.alenkin.repository.LabelRepositoryImpl;
 
+import java.sql.SQLException;
+
 /**
  * @author Alenkin Andrew
  * oxqq@ya.ru
@@ -19,20 +21,12 @@ public class LabelServiceImpl implements LabelService{
     private LabelRepository lRepo = new LabelRepositoryImpl();
 
     @Override
-    public void addLabel(Label label, long postId) {
-        try {
+    public void addLabel(Label label, long postId) throws SQLException, NotExistException, ExistException {
             lRepo.addLabel(label, postId);
-        } catch (ExistException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
-    public void removeLabel(Label label) {
-        try {
-            lRepo.removeLabel(label);
-        } catch (NotExistException e) {
-            e.printStackTrace();
-        }
+    public void removeLabelById(long labelId) throws SQLException, NotExistException, ExistException {
+            lRepo.removeLabel(labelId);
     }
 }

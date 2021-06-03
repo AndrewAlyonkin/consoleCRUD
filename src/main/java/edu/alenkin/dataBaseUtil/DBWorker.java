@@ -52,20 +52,17 @@ public class DBWorker {
      * @param executor the lambda-expression for setting {@link PreparedStatement} parameters and it execution
      * @return required T object
      */
-    public <T> T executePrepared(String query, SqlExecutor<T> executor) {
+    public <T> T executePrepared(String query, SqlExecutor<T> executor) throws SQLException, NotExistException, ExistException {
         try (Connection connection = connectionFactory.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             return executor.execute(preparedStatement);
-        } catch (SQLException | NotExistException | ExistException e) {
-            e.printStackTrace();
         }
-        return null;
     }
 
-    public <T> T executeTransactional(TransactionalExecutor<T> transExecutor){
-        T result = null;
-        try (Connection connection = connectionFactory.getConnection()){
-            try{
+    public <T> T executeTransactional(TransactionalExecutor<T> transExecutor) throws SQLException {
+        T result;
+        try (Connection connection = connectionFactory.getConnection()) {
+            try {
                 connection.setAutoCommit(false);
                 result = transExecutor.transExecute(connection);
                 connection.commit();
@@ -74,10 +71,7 @@ public class DBWorker {
                 connection.rollback();
                 throw e;
             }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
         }
-        return result;
     }
 
     /**

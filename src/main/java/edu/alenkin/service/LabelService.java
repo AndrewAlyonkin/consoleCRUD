@@ -5,7 +5,11 @@ package edu.alenkin.service;
  * oxqq@ya.ru
  */
 
+import edu.alenkin.exception.ExistException;
+import edu.alenkin.exception.NotExistException;
 import edu.alenkin.model.Label;
+
+import java.sql.SQLException;
 
 /**
  * The service interface that provides access to {@link edu.alenkin.repository.LabelRepository}
@@ -19,11 +23,11 @@ public interface LabelService {
      * @param label the {@link Label} to add in storage
      * @param postId the {@link edu.alenkin.model.Post} that the {@link Label} belongs to.
      */
-    void addLabel(Label label, long postId);
+    void addLabel(Label label, long postId) throws SQLException, NotExistException, ExistException;
 
     /**
      * Takes the existing post and deletes it from storage
-     * @param label the {@link Label} for deleting
+     * @param labelId the id of {@link Label} for deleting
      */
-    void removeLabel(Label label);
+    void removeLabelById(long labelId) throws SQLException, NotExistException, ExistException;
 }
