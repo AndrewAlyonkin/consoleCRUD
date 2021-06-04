@@ -24,11 +24,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class WriterServiceImplTest {
     @Mock
-    WriterRepository writerMock;
+    private WriterRepository writerMock;
     @InjectMocks
-    WriterServiceImpl writerService = new WriterServiceImpl();
-    ArgumentCaptor<Writer> writerCaptor;
-    ArgumentCaptor<Long> idCaptor;
+    private WriterServiceImpl writerService = new WriterServiceImpl();
+    private ArgumentCaptor<Writer> writerCaptor;
+    private ArgumentCaptor<Long> idCaptor;
     private Writer testWriter;
     private List<Writer> testWritersList;
     private long testWriterId;
@@ -40,6 +40,7 @@ class WriterServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        Mockito.reset(writerMock);
         writerCaptor = ArgumentCaptor.forClass(Writer.class);
         idCaptor = ArgumentCaptor.forClass(Long.class);
         testWriterId = 100L;

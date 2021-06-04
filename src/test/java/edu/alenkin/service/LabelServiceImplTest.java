@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.mockito.*;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import java.sql.SQLException;
 
@@ -23,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class LabelServiceImplTest {
     @Mock
-    private LabelRepository mockRepository;
+    private LabelRepository labelMock;
     @InjectMocks
     LabelServiceImpl labelService = new LabelServiceImpl();
     private ArgumentCaptor<Label> labelCaptor;
@@ -39,6 +38,7 @@ class LabelServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        Mockito.reset(labelMock);
         testLabel = new Label("testName");
         postId = 10L;
         labelCaptor = ArgumentCaptor.forClass(Label.class);
@@ -48,7 +48,7 @@ class LabelServiceImplTest {
     @Test
     void addLabelTest() throws SQLException, NotExistException, ExistException {
         labelService.addLabel(testLabel, postId);
-        Mockito.verify(mockRepository).addLabel(labelCaptor.capture(), idCaptor.capture());
+        Mockito.verify(labelMock).addLabel(labelCaptor.capture(), idCaptor.capture());
         assertEquals(testLabel, labelCaptor.getValue());
         assertEquals(postId, idCaptor.getValue());
     }
@@ -56,7 +56,7 @@ class LabelServiceImplTest {
     @Test
     void removeLabelByIdTest() throws SQLException, NotExistException, ExistException {
         labelService.removeLabelById(postId);
-        Mockito.verify(mockRepository).removeLabel(idCaptor.capture());
+        Mockito.verify(labelMock).removeLabel(idCaptor.capture());
         assertEquals(postId, idCaptor.getValue());
     }
 }

@@ -42,6 +42,7 @@ class PostServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        Mockito.reset(postMock);
         testPostId = 10L;
         testWriterId = 100L;
         testPost = new Post(testPostId, "testContent", LocalDateTime.now());
