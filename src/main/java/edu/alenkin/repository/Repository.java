@@ -1,33 +1,17 @@
 package edu.alenkin.repository;
 
+import edu.alenkin.utils.ResultSetParser;
+
+import java.util.List;
+
 /**
  * @author Alenkin Andrew
  * oxqq@ya.ru
  */
+public interface Repository <T, ID>{
+    ID save(T object, ID ownerId);
 
-import edu.alenkin.Config;
-import edu.alenkin.dataBaseUtil.DBWorker;
+    void delete(Long id);
 
-import java.sql.DriverManager;
-import java.sql.SQLException;
-
-/**
- * Super repository class where the connection to the database is configured and the same
- * {@link edu.alenkin.dataBaseUtil.DBWorker database worker} for child repositories is initialized
- */
-public abstract class Repository {
-    private static Config config = Config.getInstance();
-    protected DBWorker dbWorker;
-
-    public Repository() {
-        try {
-            this.dbWorker = new DBWorker(() -> DriverManager.getConnection(
-                    config.getDbURL(),
-                    config.getDbUser(),
-                    config.getDbPassword()
-            ));
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
+    T get(ID id);
 }

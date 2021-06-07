@@ -1,13 +1,10 @@
 package edu.alenkin.service;
 
-import edu.alenkin.exception.ExistException;
-import edu.alenkin.exception.NotExistException;
 import edu.alenkin.model.Post;
-import edu.alenkin.model.Writer;
 import edu.alenkin.repository.PostRepository;
 import edu.alenkin.repository.PostRepositoryImpl;
 
-import java.sql.SQLException;
+import java.util.List;
 
 /**
  * @author Alenkin Andrew
@@ -25,17 +22,26 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void removePost(long postId) throws SQLException, NotExistException, ExistException {
-        pRepo.removePost(postId);
+    public Long add(Post post, Long ownerId) {
+        return pRepo.save(post, ownerId);
     }
 
     @Override
-    public void addPost(Post post, long writerId) throws SQLException, NotExistException, ExistException {
-        pRepo.addPost(post, writerId);
+    public void remove(Long postId) {
+        pRepo.delete(postId);
     }
 
     @Override
-    public void updatePostsForWriter(Writer writer) throws SQLException, NotExistException, ExistException {
-        pRepo.updatePostsForWriter(writer);
+    public Long update(Post post, Long writerId) {
+        return pRepo.save(post, writerId);
+    }
+
+    @Override
+    public Post get(Long postId) {
+        return pRepo.get(postId);
+    }
+
+    public List<Post> getByWriterId(Long id) {
+        return pRepo.getByWriterId(id);
     }
 }

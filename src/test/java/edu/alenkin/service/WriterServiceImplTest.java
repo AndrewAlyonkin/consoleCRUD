@@ -1,7 +1,5 @@
 package edu.alenkin.service;
 
-import edu.alenkin.exception.ExistException;
-import edu.alenkin.exception.NotExistException;
 import edu.alenkin.model.Writer;
 import edu.alenkin.repository.WriterRepository;
 import org.junit.jupiter.api.BeforeAll;
@@ -9,8 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.mockito.*;
-
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -52,81 +48,49 @@ class WriterServiceImplTest {
     }
 
     @Test
-    void addWriter() throws SQLException, ExistException {
-        writerService.addWriter(testWriter);
-        Mockito.verify(writerMock).addWriter(writerCaptor.capture());
-        assertEquals(testWriter, writerCaptor.getValue());
-    }
-
-    @Test
-    void addExistWriter() throws SQLException, ExistException {
-        Mockito.doThrow(new ExistException()).when(writerMock).addWriter(testWriter);
-        assertThrows(ExistException.class, () -> writerService.addWriter(testWriter));
-        Mockito.verify(writerMock).addWriter(writerCaptor.capture());
-    }
-
-    @Test
-    void getWriter() throws SQLException, NotExistException, ExistException {
-        Mockito.when(writerMock.getWriterById(testWriterId)).thenReturn(testWriter);
-        Writer currentWriter = writerService.getWriter(testWriterId);
-        Mockito.verify(writerMock).getWriterById(idCaptor.capture());
-        assertEquals(testWriter, currentWriter);
-    }
-
-    @Test
-    void getNotExistWriter() throws SQLException, NotExistException, ExistException {
-        Mockito.when(writerMock.getWriterById(testWriterId)).thenThrow(new NotExistException());
-        assertThrows(NotExistException.class,() -> writerService.getWriter(testWriterId));
-        Mockito.verify(writerMock).getWriterById(idCaptor.capture());
-    }
-
-    @Test
-    void removeWriter() throws SQLException, NotExistException, ExistException {
-        writerService.removeWriter(testWriter);
-        Mockito.verify(writerMock).removeWriter(writerCaptor.capture());
-        assertEquals(testWriter, writerCaptor.getValue());
-    }
-
-    @Test
-    void removeNotExistWriter() throws SQLException, NotExistException, ExistException {
-        Mockito.doThrow(new NotExistException()).when(writerMock).removeWriter(testWriter);
-        assertThrows(NotExistException.class, () -> writerService.removeWriter(testWriter));
-        Mockito.verify(writerMock).removeWriter(writerCaptor.capture());
-    }
-
-    @Test
-    void removeWriterById() throws SQLException, NotExistException, ExistException {
-        writerService.removeWriterById(testWriterId);
-        Mockito.verify(writerMock).removeWriterById(idCaptor.capture());
+    void removeWriter() {
+        writerService.remove(testWriterId);
+        Mockito.verify(writerMock).delete(idCaptor.capture());
         assertEquals(testWriterId, idCaptor.getValue());
     }
 
     @Test
-    void removeNotExistWriterById() throws SQLException, NotExistException, ExistException {
-        Mockito.doThrow(new NotExistException()).when(writerMock).removeWriterById(testWriterId);
-        assertThrows(NotExistException.class, () -> writerService.removeWriterById(testWriterId));
-        Mockito.verify(writerMock).removeWriterById(idCaptor.capture());
-    }
-
-
-    @Test
-    void updateWriter() throws SQLException, NotExistException, ExistException {
-        writerService.updateWriter(testWriter);
-        Mockito.verify(writerMock).updateWriter(writerCaptor.capture());
+    void addWriterTest() {
+        Mockito.when(writerMock.save(testWriter)).thenReturn(testWriterId);
+        Long id = writerService.add(testWriter);
+        Mockito.verify(writerMock).save(writerCaptor.capture());
         assertEquals(testWriter, writerCaptor.getValue());
+        assertEquals(testWriterId, id);
     }
 
     @Test
-    void clearWriters() {
-        writerService.clearWriters();
-        Mockito.verify(writerMock).clear();
+    void addWriterTestWithException() {
+        Mockito.when(writerMock.save(testWriter, 1L)).thenThrow(new IllegalArgumentException());
+        assertThrows(IllegalArgumentException.class, () -> writerService.add(testWriter, 1L));
     }
 
     @Test
-    void getAllWriters() throws SQLException, NotExistException, ExistException {
-        Mockito.when(writerMock.getAllWriters()).thenReturn(testWritersList);
-        List<Writer> currentList = writerService.getAllWriters();
-        Mockito.verify(writerMock).getAllWriters();
+    void updateWriterTest() {
+        Mockito.when(writerMock.save(testWriter)).thenReturn(testWriterId);
+        Long id = writerService.update(testWriter);
+        Mockito.verify(writerMock).save(writerCaptor.capture());
+        assertEquals(testWriter, writerCaptor.getValue());
+        assertEquals(testWriterId, id);
+    }
+
+    @Test
+    void getWriter() {
+        Mockito.when(writerMock.get(testWriterId)).thenReturn(testWriter);
+        Writer currentWriter = writerService.get(testWriterId);
+        Mockito.verify(writerMock).get(idCaptor.capture());
+        assertEquals(testWriter, currentWriter);
+    }
+
+    @Test
+    void getAllWriters() {
+        Mockito.when(writerMock.getAll()).thenReturn(testWritersList);
+        List<Writer> currentList = writerService.getAll();
+        Mockito.verify(writerMock).getAll();
         assertEquals(testWritersList, currentList);
     }
 }

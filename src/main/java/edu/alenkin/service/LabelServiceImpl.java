@@ -1,13 +1,10 @@
 package edu.alenkin.service;
 
-import edu.alenkin.exception.ExistException;
-import edu.alenkin.exception.NotExistException;
 import edu.alenkin.model.Label;
-import edu.alenkin.model.Post;
 import edu.alenkin.repository.LabelRepository;
 import edu.alenkin.repository.LabelRepositoryImpl;
 
-import java.sql.SQLException;
+import java.util.List;
 
 /**
  * @author Alenkin Andrew
@@ -25,12 +22,28 @@ public class LabelServiceImpl implements LabelService{
     }
 
     @Override
-    public void addLabel(Label label, long postId) throws SQLException, NotExistException, ExistException {
-            lRepo.addLabel(label, postId);
+    public Long add(Label label, Long postId) {
+       return lRepo.save(label, postId);
     }
 
     @Override
-    public void removeLabelById(long labelId) throws SQLException, NotExistException, ExistException {
-            lRepo.removeLabel(labelId);
+    public void remove(Long id) {
+        lRepo.delete(id);
+    }
+
+    @Override
+    public Long update(Label label, Long ownerId) {
+        return lRepo.save(label, ownerId);
+    }
+
+    @Override
+    public Label get(Long labelId) {
+        return lRepo.get(labelId);
+    }
+
+
+    @Override
+    public List<Label> getByPostId(Long postId) {
+        return lRepo.getByPostId(postId);
     }
 }

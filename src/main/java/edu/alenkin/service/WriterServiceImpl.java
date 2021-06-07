@@ -1,12 +1,9 @@
 package edu.alenkin.service;
 
-import edu.alenkin.exception.ExistException;
-import edu.alenkin.exception.NotExistException;
 import edu.alenkin.model.Writer;
 import edu.alenkin.repository.WriterRepository;
 import edu.alenkin.repository.WriterRepositoryImpl;
 
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -25,37 +22,38 @@ public class WriterServiceImpl implements WriterService {
     }
 
     @Override
-    public void addWriter(Writer writer) throws ExistException, SQLException {
-            wRepo.addWriter(writer);
+    @Deprecated
+    public Long add(Writer addEntity, Long ownerId) {
+       throw new IllegalArgumentException("Writer can not have the owner, operation with ownerId parameter is forbidden!");
     }
 
     @Override
-    public Writer getWriter(long writerId) throws SQLException, NotExistException, ExistException {
-            return wRepo.getWriterById(writerId);
+    public Long update(Writer entity, Long ownerId) {
+        throw new IllegalArgumentException("Writer can not have the owner, operation with ownerId parameter is forbidden!");
     }
 
     @Override
-    public void removeWriter(Writer writer) throws SQLException, NotExistException, ExistException {
-            wRepo.removeWriter(writer);
+    public void remove(Long writerId) {
+        wRepo.delete(writerId);
     }
 
     @Override
-    public void removeWriterById(long id) throws SQLException, NotExistException, ExistException {
-        wRepo.removeWriterById(id);
+    public Writer get(Long writerId) {
+        return wRepo.get(writerId);
     }
 
     @Override
-    public void updateWriter(Writer writer) throws SQLException, NotExistException, ExistException {
-            wRepo.updateWriter(writer);
+    public Long add(Writer writer) {
+        return wRepo.save(writer);
     }
 
     @Override
-    public void clearWriters() {
-        wRepo.clear();
+    public Long update(Writer writer) {
+        return wRepo.save(writer);
     }
 
     @Override
-    public List<Writer> getAllWriters() throws SQLException, NotExistException, ExistException {
-        return wRepo.getAllWriters();
+    public List<Writer> getAll() {
+        return wRepo.getAll();
     }
 }

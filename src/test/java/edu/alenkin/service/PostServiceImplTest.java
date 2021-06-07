@@ -1,7 +1,5 @@
 package edu.alenkin.service;
 
-import edu.alenkin.exception.ExistException;
-import edu.alenkin.exception.NotExistException;
 import edu.alenkin.model.Post;
 import edu.alenkin.model.PostStatus;
 import edu.alenkin.model.Writer;
@@ -11,9 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.mockito.*;
-
-import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -27,13 +24,15 @@ class PostServiceImplTest {
     PostRepository postMock;
     @InjectMocks
     PostServiceImpl postService = new PostServiceImpl();
-    private ArgumentCaptor<Long> idCaptor;
+    private ArgumentCaptor<Long> postIdCaptor;
+    private ArgumentCaptor<Long> writerIdCaptor;
     private ArgumentCaptor<Post> postCaptor;
     private ArgumentCaptor<Writer> writerCaptor;
     private long testPostId;
     private long testWriterId;
     private Post testPost;
     private Writer testWriter;
+    private List<Post> testPostList;
 
     @BeforeAll
     public void init() {
@@ -50,30 +49,55 @@ class PostServiceImplTest {
 
         testWriter = new Writer(testWriterId, "testName", "testSoName");
         testWriter.addPost(testPost);
-        idCaptor = ArgumentCaptor.forClass(Long.class);
+        postIdCaptor = ArgumentCaptor.forClass(Long.class);
+        writerIdCaptor = ArgumentCaptor.forClass(Long.class);
         postCaptor = ArgumentCaptor.forClass(Post.class);
         writerCaptor = ArgumentCaptor.forClass(Writer.class);
+        testPostList = List.of(testPost);
     }
 
     @Test
-    void removePostTest() throws SQLException, NotExistException, ExistException {
-        postService.removePost(testPostId);
-        Mockito.verify(postMock).removePost(idCaptor.capture());
-        assertEquals(testPostId, idCaptor.getValue());
+    void removePostTest() {
+        postService.remove(testPostId);
+        Mockito.verify(postMock).delete(postIdCaptor.capture());
+        assertEquals(testPostId, postIdCaptor.getValue());
     }
 
     @Test
-    void addPostTest() throws SQLException, NotExistException, ExistException {
-        postService.addPost(testPost, testPostId);
-        Mockito.verify(postMock).addPost(postCaptor.capture(), idCaptor.capture());
+    void addPostTest() {
+        Mockito.when(postMock.save(testPost, testWriterId)).thenReturn(testPostId);
+        Long id = postService.add(testPost, testWriterId);
+        Mockito.verify(postMock).save(postCaptor.capture(), writerIdCaptor.capture());
         assertEquals(testPost, postCaptor.getValue());
-        assertEquals(testPostId, idCaptor.getValue());
+        assertEquals(testWriterId, writerIdCaptor.getValue());
+        assertEquals(testPostId, id);
     }
 
     @Test
-    void updatePostsForWriterTest() throws SQLException, NotExistException, ExistException {
-        postService.updatePostsForWriter(testWriter);
-        Mockito.verify(postMock).updatePostsForWriter(writerCaptor.capture());
-        assertEquals(testWriter, writerCaptor.getValue());
+    void updatePostTest() {
+        Mockito.when(postMock.save(testPost, testWriterId)).thenReturn(testPostId);
+        Long id = postService.update(testPost, testWriterId);
+        Mockito.verify(postMock).save(postCaptor.capture(), writerIdCaptor.capture());
+        assertEquals(testPost, postCaptor.getValue());
+        assertEquals(testWriterId, writerIdCaptor.getValue());
+        assertEquals(testPostId, id);
+    }
+
+    @Test
+    void getPostTest() {
+        Mockito.when(postMock.get(testPostId)).thenReturn(testPost);
+        Post currentPost = postService.get(testPostId);
+        Mockito.verify(postMock).get(postIdCaptor.capture());
+        assertEquals(testPostId, postIdCaptor.getValue());
+        assertEquals(testPost, currentPost);
+    }
+
+    @Test
+    void getByWriterIdTest() {
+        Mockito.when(postMock.getByWriterId(testWriterId)).thenReturn(testPostList);
+        List<Post> postsList = postService.getByWriterId(testWriterId);
+        Mockito.verify(postMock).getByWriterId(writerIdCaptor.capture());
+        assertEquals(testPostList, postsList);
+        assertEquals(testWriterId, writerIdCaptor.getValue());
     }
 }

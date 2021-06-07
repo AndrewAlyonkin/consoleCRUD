@@ -1,7 +1,6 @@
 package edu.alenkin.view;
 
-import edu.alenkin.controller.Controller;
-import edu.alenkin.model.ModelBuffer;
+import java.util.List;
 
 /**
  * @author Alenkin Andrew
@@ -11,13 +10,20 @@ import edu.alenkin.model.ModelBuffer;
 /**
  * Represent the program window. Shows the current state of the program in the console.
  */
-public interface View {
+public interface View<T> {
 
-    void setController(Controller controller);
+    void show(T t);
 
-    /**
-     * Update actual state of the program and print it in the console
-     * @param buffer the exchanger between view and the {@link edu.alenkin.repository.Repository}
-     */
-    void refresh(ModelBuffer buffer);
+    void show(List<T> ts);
+
+
+    default void show(String message) {
+        System.out.println(message);
+    }
+
+
+    default void err(String err){
+        System.err.println(err);
+    }
+
 }

@@ -14,20 +14,19 @@ import java.util.Objects;
  * <br>It can contains many different {@link edu.alenkin.model.Post posts}
  */
 public class Writer {
-    private long id;
+    private Long id;
     private String firstName;
     private String lastName;
     private List<Post> posts = new ArrayList<>();
 
-    public Writer(long id, String firstName, String lastName) {
+    public Writer(Long id, String firstName, String lastName) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
     }
 
     public Writer(String firstName, String lastName) {
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this(null, firstName, lastName);
     }
 
     /**
@@ -39,11 +38,11 @@ public class Writer {
         this.posts.add(post);
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -83,7 +82,7 @@ public class Writer {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Writer writer = (Writer) o;
-        return id == writer.id && Objects.equals(firstName, writer.firstName) && Objects.equals(lastName, writer.lastName) && Objects.equals(posts, writer.posts);
+        return id.equals(writer.id) && Objects.equals(firstName, writer.firstName) && Objects.equals(lastName, writer.lastName) && Objects.equals(posts, writer.posts);
     }
 
     @Override

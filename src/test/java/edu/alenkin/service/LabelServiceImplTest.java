@@ -1,7 +1,5 @@
 package edu.alenkin.service;
 
-import edu.alenkin.exception.ExistException;
-import edu.alenkin.exception.NotExistException;
 import edu.alenkin.model.Label;
 import edu.alenkin.repository.LabelRepository;
 import org.junit.jupiter.api.BeforeAll;
@@ -9,10 +7,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.mockito.*;
+import java.util.List;
 
-import java.sql.SQLException;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Alenkin Andrew
@@ -26,13 +23,16 @@ class LabelServiceImplTest {
     @InjectMocks
     LabelServiceImpl labelService = new LabelServiceImpl();
     private ArgumentCaptor<Label> labelCaptor;
-    private ArgumentCaptor<Long> idCaptor;
+    private ArgumentCaptor<Long> postIdCaptor;
+    private ArgumentCaptor<Long> labelIdCaptor;
 
+    private List<Label> testLabelsList;
     private Label testLabel;
     private Long postId;
+    private Long labelId;
 
     @BeforeAll
-    public void init(){
+    public void init() {
         MockitoAnnotations.initMocks(this);
     }
 
@@ -41,22 +41,55 @@ class LabelServiceImplTest {
         Mockito.reset(labelMock);
         testLabel = new Label("testName");
         postId = 10L;
+        labelId = 100L;
         labelCaptor = ArgumentCaptor.forClass(Label.class);
-        idCaptor = ArgumentCaptor.forClass(Long.class);
+        postIdCaptor = ArgumentCaptor.forClass(Long.class);
+        labelIdCaptor = ArgumentCaptor.forClass(Long.class);
+        testLabelsList = List.of(testLabel);
     }
 
     @Test
-    void addLabelTest() throws SQLException, NotExistException, ExistException {
-        labelService.addLabel(testLabel, postId);
-        Mockito.verify(labelMock).addLabel(labelCaptor.capture(), idCaptor.capture());
+    void addLabelTest() {
+        Mockito.when(labelMock.save(testLabel, postId)).thenReturn(labelId);
+        Long id = labelService.add(testLabel, postId);
+        Mockito.verify(labelMock).save(labelCaptor.capture(), postIdCaptor.capture());
         assertEquals(testLabel, labelCaptor.getValue());
-        assertEquals(postId, idCaptor.getValue());
+        assertEquals(postId, postIdCaptor.getValue());
+        assertEquals(labelId, id);
     }
 
     @Test
-    void removeLabelByIdTest() throws SQLException, NotExistException, ExistException {
-        labelService.removeLabelById(postId);
-        Mockito.verify(labelMock).removeLabel(idCaptor.capture());
-        assertEquals(postId, idCaptor.getValue());
+    void removeLabelByIdTest() {
+        labelService.remove(postId);
+        Mockito.verify(labelMock).delete(postIdCaptor.capture());
+        assertEquals(postId, postIdCaptor.getValue());
+    }
+
+    @Test
+    void getLabelTest() {
+        Mockito.when(labelMock.get(labelId)).thenReturn(testLabel);
+        Label currentLabel = labelService.get(labelId);
+        Mockito.verify(labelMock).get(labelIdCaptor.capture());
+        assertEquals(labelId, labelIdCaptor.getValue());
+        assertEquals(testLabel, currentLabel);
+    }
+
+    @Test
+    void getByPostIdTest() {
+        Mockito.when(labelMock.getByPostId(postId)).thenReturn(testLabelsList);
+        List<Label> labelsList = labelService.getByPostId(postId);
+        Mockito.verify(labelMock).getByPostId(postIdCaptor.capture());
+        assertEquals(testLabelsList, labelsList);
+        assertEquals(postId, postIdCaptor.getValue());
+    }
+
+    @Test
+    void updateLabelTest() {
+        Mockito.when(labelMock.save(testLabel, postId)).thenReturn(labelId);
+        Long id = labelService.update(testLabel, postId);
+        Mockito.verify(labelMock).save(labelCaptor.capture(), postIdCaptor.capture());
+        assertEquals(testLabel, labelCaptor.getValue());
+        assertEquals(postId, postIdCaptor.getValue());
+        assertEquals(labelId, id);
     }
 }
