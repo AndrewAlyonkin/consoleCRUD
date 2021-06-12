@@ -1,4 +1,4 @@
-package edu.alenkin.utils;
+package edu.alenkin.utils.jdbc;
 
 /**
  * @author Alenkin Andrew

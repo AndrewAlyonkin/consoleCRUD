@@ -1,4 +1,4 @@
-package edu.alenkin.utils;
+package edu.alenkin.utils.jdbc;
 
 /**
  * @author Alenkin Andrew
@@ -14,7 +14,7 @@ import java.util.Properties;
 /**
  * Class provides util methods for manipulating data in database using {@link java.sql.Connection dataBase connection}.
  */
-public class DBWorker {
+public class JdbcWorker {
     private static Connection connection;
 
     private static String url;
