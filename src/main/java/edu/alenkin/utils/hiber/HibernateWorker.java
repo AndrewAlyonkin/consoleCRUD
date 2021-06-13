@@ -21,6 +21,7 @@ public class HibernateWorker {
                     .buildSessionFactory();
         }
         catch (Exception e) {
+            e.printStackTrace();
             StandardServiceRegistryBuilder.destroy(registry);
         }
     }

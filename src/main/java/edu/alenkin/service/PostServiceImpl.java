@@ -2,7 +2,8 @@ package edu.alenkin.service;
 
 import edu.alenkin.model.Post;
 import edu.alenkin.repository.PostRepository;
-import edu.alenkin.repository.PostRepositoryImpl;
+import edu.alenkin.repository.hibernate.PostRepositoryHiber;
+import edu.alenkin.repository.jdbc.PostRepositoryJdbc;
 
 import java.util.List;
 
@@ -18,7 +19,8 @@ public class PostServiceImpl implements PostService {
     private PostRepository pRepo;
 
     public PostServiceImpl() {
-        this.pRepo = new PostRepositoryImpl();
+        //this.pRepo = new PostRepositoryJdbc();
+        this.pRepo = new PostRepositoryHiber();
     }
 
     @Override

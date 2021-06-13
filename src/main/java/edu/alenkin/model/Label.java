@@ -5,20 +5,35 @@ package edu.alenkin.model;
  * oxqq@ya.ru
  */
 
+import javax.persistence.*;
 import java.util.Objects;
 
 /**
  * Class represents the entity of label of {@link edu.alenkin.model.Post post}.
  * <br>It belongs to the {@link edu.alenkin.model.Post post} entity
  */
+@Entity
+@Table(name = "labels")
 public class Label {
+    @Id
+    @Column(name = "id", columnDefinition = "BIGINT", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "name", columnDefinition = "VARCHAR")
     private String name;
+
+    @Column(name = "post_id")
+    private Long post_id;
 
     public Label(Long id, String name) {
         this.id = id;
         this.name = name;
     }
+
+    public Label() {
+    }
+
     public Label(String name) {
         this.name = name;
     }
@@ -33,6 +48,10 @@ public class Label {
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override

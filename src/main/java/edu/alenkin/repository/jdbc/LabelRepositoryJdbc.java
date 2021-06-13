@@ -1,7 +1,8 @@
-package edu.alenkin.repository;
+package edu.alenkin.repository.jdbc;
 
 import edu.alenkin.model.Label;
-import edu.alenkin.utils.DBWorker;
+import edu.alenkin.repository.LabelRepository;
+import edu.alenkin.utils.jdbc.JdbcWorker;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,7 +18,7 @@ import java.util.List;
  * The base implementation of {@link edu.alenkin.repository.LabelRepository} for manipulating
  * {@link edu.alenkin.model.Label} entity in storage
  */
-public class LabelRepositoryImpl implements LabelRepository {
+public class LabelRepositoryJdbc implements LabelRepository {
 
     @Override
     public Long save(Label label, Long postId) {
@@ -25,13 +26,13 @@ public class LabelRepositoryImpl implements LabelRepository {
         try {
             // Если добавляем новую запись в базу данных
             if (labelId == null) {
-                return DBWorker.executeSave("INSERT INTO labels (name, post_id) VALUES(?, ?)", prepSt -> {
+                return JdbcWorker.executeSave("INSERT INTO labels (name, post_id) VALUES(?, ?)", prepSt -> {
                     prepSt.setString(1, label.getName());
                     prepSt.setLong(2, postId);
                 });
                 // если обновляем существующую запись
             } else {
-                return DBWorker.executeSave("UPDATE labels SET name=? WHERE id=?", prepSt -> {
+                return JdbcWorker.executeSave("UPDATE labels SET name=? WHERE id=?", prepSt -> {
                     prepSt.setString(1, label.getName());
                     prepSt.setLong(2, labelId);
                 });
@@ -46,7 +47,7 @@ public class LabelRepositoryImpl implements LabelRepository {
     @Override
     public void delete(Long id) {
         try {
-            DBWorker.executeVoid("DELETE FROM labels WHERE id=?", id);
+            JdbcWorker.executeVoid("DELETE FROM labels WHERE id=?", id);
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -54,12 +55,12 @@ public class LabelRepositoryImpl implements LabelRepository {
 
     @Override
     public Label get(Long id) {
-        return DBWorker.executeGet("SELECT * FROM labels WHERE id=?;", id, this::parse);
+        return JdbcWorker.executeGet("SELECT * FROM labels WHERE id=?;", id, this::parse);
     }
 
     @Override
     public List<Label> getByPostId(Long id) {
-        return DBWorker.executeGet("SELECT * FROM labels WHERE post_id=?;", id, this::parseList);
+        return JdbcWorker.executeGet("SELECT * FROM labels WHERE post_id=?;", id, this::parseList);
     }
 
     /**

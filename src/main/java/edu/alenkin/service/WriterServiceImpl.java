@@ -2,7 +2,8 @@ package edu.alenkin.service;
 
 import edu.alenkin.model.Writer;
 import edu.alenkin.repository.WriterRepository;
-import edu.alenkin.repository.WriterRepositoryImpl;
+import edu.alenkin.repository.hibernate.WriterRepositoryHiber;
+import edu.alenkin.repository.jdbc.WriterRepositoryJdbc;
 
 import java.util.List;
 
@@ -18,7 +19,8 @@ public class WriterServiceImpl implements WriterService {
     private WriterRepository wRepo;
 
     public WriterServiceImpl() {
-        this.wRepo = new WriterRepositoryImpl();
+        //this.wRepo = new WriterRepositoryJdbc();
+        this.wRepo = new WriterRepositoryHiber();
     }
 
     @Override

@@ -2,7 +2,8 @@ package edu.alenkin.service;
 
 import edu.alenkin.model.Label;
 import edu.alenkin.repository.LabelRepository;
-import edu.alenkin.repository.LabelRepositoryImpl;
+import edu.alenkin.repository.hibernate.LabelRepositoryHiber;
+import edu.alenkin.repository.jdbc.LabelRepositoryJdbc;
 
 import java.util.List;
 
@@ -18,7 +19,8 @@ public class LabelServiceImpl implements LabelService{
     private LabelRepository lRepo;
 
     public LabelServiceImpl() {
-        this.lRepo = new LabelRepositoryImpl();
+       // this.lRepo = new LabelRepositoryJdbc();
+        this.lRepo = new LabelRepositoryHiber();
     }
 
     @Override

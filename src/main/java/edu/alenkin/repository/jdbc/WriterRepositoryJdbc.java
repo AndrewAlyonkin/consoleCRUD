@@ -1,8 +1,9 @@
-package edu.alenkin.repository;
+package edu.alenkin.repository.jdbc;
 
 import edu.alenkin.model.Post;
 import edu.alenkin.model.Writer;
-import edu.alenkin.utils.DBWorker;
+import edu.alenkin.repository.WriterRepository;
+import edu.alenkin.utils.jdbc.JdbcWorker;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,12 +19,12 @@ import java.util.List;
  * The base implementation of {@link edu.alenkin.repository.WriterRepository} for manipulating
  * {@link edu.alenkin.model.Writer} entity in storage
  */
-public class WriterRepositoryImpl implements WriterRepository {
+public class WriterRepositoryJdbc implements WriterRepository {
 
     @Override
     public void delete(Long id) {
         try {
-            DBWorker.executeVoid("DELETE FROM writers WHERE id=?", id);
+            JdbcWorker.executeVoid("DELETE FROM writers WHERE id=?", id);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -38,7 +39,7 @@ public class WriterRepositoryImpl implements WriterRepository {
 
     @Override
     public Writer get(Long writerId) {
-        return DBWorker.executeGet("SELECT * FROM writers WHERE id=?", writerId, this::parse);
+        return JdbcWorker.executeGet("SELECT * FROM writers WHERE id=?", writerId, this::parse);
     }
 
 
@@ -52,14 +53,14 @@ public class WriterRepositoryImpl implements WriterRepository {
         Long writerId = writer.getId();
         try {
             if (writerId == null) {
-                writerId = DBWorker.executeSave("INSERT INTO writers (first_name, last_name) VALUES (?, ?);",
+                writerId = JdbcWorker.executeSave("INSERT INTO writers (first_name, last_name) VALUES (?, ?);",
                         prepSt -> {
                             prepSt.setString(1, writer.getFirstName());
                             prepSt.setString(2, writer.getLastName());
                         });
             } else {
                 Long finalWriterId = writerId;
-                writerId = DBWorker.executeSave("UPDATE writers SET first_name=?, last_name=? WHERE id=?",
+                writerId = JdbcWorker.executeSave("UPDATE writers SET first_name=?, last_name=? WHERE id=?",
                         prepSt -> {
                             prepSt.setString(1, writer.getFirstName());
                             prepSt.setString(2, writer.getLastName());
@@ -69,7 +70,7 @@ public class WriterRepositoryImpl implements WriterRepository {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        PostRepositoryImpl postRepo = new PostRepositoryImpl();
+        PostRepositoryJdbc postRepo = new PostRepositoryJdbc();
         for (Post post : writer.getPosts()) {
             postRepo.save(post, writerId);
         }
@@ -78,7 +79,7 @@ public class WriterRepositoryImpl implements WriterRepository {
 
     @Override
     public List<Writer> getAll(){
-        return DBWorker.executeGet("SELECT * FROM writers", null, this::parseList);
+        return JdbcWorker.executeGet("SELECT * FROM writers", null, this::parseList);
     }
 
     private Writer parse(ResultSet resultSet) throws SQLException {
@@ -88,14 +89,14 @@ public class WriterRepositoryImpl implements WriterRepository {
                     resultSet.getLong("id"),
                     resultSet.getString("first_name"),
                     resultSet.getString("last_name"));
-            currentWriter.setPosts(new PostRepositoryImpl().getByWriterId(currentWriter.getId()));
+            currentWriter.setPosts(new PostRepositoryJdbc().getByWriterId(currentWriter.getId()));
         }
         return currentWriter;
     }
 
     private List<Writer> parseList(ResultSet resultSet) throws SQLException {
         List<Writer> writers = new ArrayList<>();
-        PostRepositoryImpl postRepo = new PostRepositoryImpl();
+        PostRepositoryJdbc postRepo = new PostRepositoryJdbc();
         while (resultSet.next()) {
             Writer currentWriter = new Writer(
                     resultSet.getLong("id"),

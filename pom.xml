@@ -17,6 +17,7 @@
         <maven.compiler.source>1.9</maven.compiler.source>
         <maven.compiler.target>1.9</maven.compiler.target>
         <flyway-version>7.10.0</flyway-version>
+        <jacoco.version>0.7.9</jacoco.version>
     </properties>
 
     <dependencies>
@@ -64,6 +65,12 @@
             <version>${flyway-version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>0.8.7</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -71,6 +78,7 @@
             <plugins>
 
                 <!--  To migrate database run command "  mvn clean flyway:migrate  " in the terminal  -->
+                <!--  To drop schema run command "  mvn flyway:clean  " in the terminal  -->
                 <plugin>
                     <groupId>org.flywaydb</groupId>
                     <artifactId>flyway-maven-plugin</artifactId>
@@ -83,6 +91,26 @@
                     </configuration>
                 </plugin>
 
+                <!-- JaCoCo plugin -->
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.8.7</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>report</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
 
                 <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
                 <plugin>

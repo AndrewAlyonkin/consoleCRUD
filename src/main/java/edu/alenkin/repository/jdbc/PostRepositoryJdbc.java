@@ -1,9 +1,10 @@
-package edu.alenkin.repository;
+package edu.alenkin.repository.jdbc;
 
 import edu.alenkin.model.Label;
 import edu.alenkin.model.Post;
 import edu.alenkin.model.PostStatus;
-import edu.alenkin.utils.DBWorker;
+import edu.alenkin.repository.PostRepository;
+import edu.alenkin.utils.jdbc.JdbcWorker;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,7 +21,7 @@ import java.util.List;
  * The base implementation of {@link edu.alenkin.repository.PostRepository} for manipulating
  * {@link edu.alenkin.model.Post} entity in storage
  */
-public class PostRepositoryImpl implements PostRepository {
+public class PostRepositoryJdbc implements PostRepository {
 
     @Override
     public Long save(Post post, Long writerId) {
@@ -28,7 +29,7 @@ public class PostRepositoryImpl implements PostRepository {
         try {
             //если добавляем новый пост и для него еще не существует id
             if (post.getId() == null) {
-                postId = DBWorker.executeSave("INSERT INTO posts (content, status, create_time, update_time, writer_id)" +
+                postId = JdbcWorker.executeSave("INSERT INTO posts (content, status, create_time, update_time, writer_id)" +
                         "VALUES (?, ?, ?, ?, ?)", prepSt -> {
                     prepSt.setString(1, post.getContent());
                     prepSt.setString(2, post.getStatus().name());
@@ -38,7 +39,7 @@ public class PostRepositoryImpl implements PostRepository {
                 });
                 //если обновляем существующий пост
             } else {
-                DBWorker.executeSave("UPDATE posts SET content=?, status=?, update_time=? WHERE id=?", prepSt -> {
+                JdbcWorker.executeSave("UPDATE posts SET content=?, status=?, update_time=? WHERE id=?", prepSt -> {
                     prepSt.setString(1, post.getContent());
                     prepSt.setString(2, post.getStatus().name());
                     prepSt.setTimestamp(3, Timestamp.valueOf(post.getUpdated()));
@@ -46,7 +47,7 @@ public class PostRepositoryImpl implements PostRepository {
                 });
             }
             //записываем в базу комментарии для поста
-            LabelRepositoryImpl labelRepo = new LabelRepositoryImpl();
+            LabelRepositoryJdbc labelRepo = new LabelRepositoryJdbc();
             for (Label label : post.getLabels()) {
                 labelRepo.save(label, postId);
             }
@@ -59,7 +60,7 @@ public class PostRepositoryImpl implements PostRepository {
     @Override
     public void delete(Long id) {
         try {
-            DBWorker.executeVoid("DELETE FROM posts WHERE id=?", id);
+            JdbcWorker.executeVoid("DELETE FROM posts WHERE id=?", id);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -67,16 +68,16 @@ public class PostRepositoryImpl implements PostRepository {
 
     @Override
     public Post get(Long id) {
-        Post currentPost = DBWorker.executeGet("SELECT * FROM posts WHERE id=?;", id, this::parse);
+        Post currentPost = JdbcWorker.executeGet("SELECT * FROM posts WHERE id=?;", id, this::parse);
         if (currentPost != null) {
-            currentPost.setLabels(new LabelRepositoryImpl().getByPostId(id));
+            currentPost.setLabels(new LabelRepositoryJdbc().getByPostId(id));
         }
         return currentPost;
     }
 
     @Override
     public List<Post> getByWriterId(Long id) {
-        List<Post> result = DBWorker.executeGet("SELECT * FROM posts WHERE writer_id=?", id, this::parseList);
+        List<Post> result = JdbcWorker.executeGet("SELECT * FROM posts WHERE writer_id=?", id, this::parseList);
         try {
             fillPostsLabels(result);
         } catch (SQLException e) {
@@ -96,7 +97,7 @@ public class PostRepositoryImpl implements PostRepository {
         if (resultPosts == null || resultPosts.isEmpty()) {
             return null;
         }
-        LabelRepositoryImpl labelRepository = new LabelRepositoryImpl();
+        LabelRepositoryJdbc labelRepository = new LabelRepositoryJdbc();
         List<Post> list = new ArrayList<>();
         for (Post post : resultPosts) {
             post.setLabels(labelRepository.getByPostId(post.getId()));
@@ -120,7 +121,7 @@ public class PostRepositoryImpl implements PostRepository {
         try {
             while (resultSet.next()) {
                 Post currentPost = new Post(resultSet.getLong("id"), resultSet.getString("content"),
-                        DBWorker.convertToLocalDateTime(resultSet.getTimestamp("update_time")));
+                        JdbcWorker.convertToLocalDateTime(resultSet.getTimestamp("update_time")));
                 currentPost.setStatus(switchStatus(resultSet.getString("status")));
                 posts.add(currentPost);
             }
@@ -133,7 +134,7 @@ public class PostRepositoryImpl implements PostRepository {
     private Post parse(ResultSet resultSet) throws SQLException {
         if (resultSet.next()) {
             Post currentPost = new Post(resultSet.getLong("id"), resultSet.getString("content"),
-                    DBWorker.convertToLocalDateTime(resultSet.getTimestamp("update_time")));
+                    JdbcWorker.convertToLocalDateTime(resultSet.getTimestamp("update_time")));
             currentPost.setStatus(switchStatus(resultSet.getString("status")));
             return currentPost;
         }

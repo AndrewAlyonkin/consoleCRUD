@@ -1,5 +1,11 @@
 package edu.alenkin.model;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,13 +20,36 @@ import java.util.Objects;
  * Class represents the entity of Post, written by the {@link edu.alenkin.model.Writer writer}.
  * <br> It can contains many different {@link edu.alenkin.model.Label labels}.
  */
+@Entity
+@Table(name = "posts")
 public class Post {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", columnDefinition = "BIGINT", nullable = false)
     private Long id;
+
+    @Column(name = "content", columnDefinition = "VARCHAR")
     private String content;
+
+    @CreationTimestamp
+    @Column(name = "create_time", columnDefinition = "TIMESTAMP", nullable = false)
     private LocalDateTime created;
+
+    @UpdateTimestamp
+    @Column(name = "update_time", columnDefinition = "TIMESTAMP")
     private LocalDateTime updated;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Label> labels;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", columnDefinition = "VARCHAR", nullable = false)
     private PostStatus status;
+
+    public Post() {
+    }
 
     public Post(Long id, String content, LocalDateTime created, LocalDateTime updated, List<Label> labels, PostStatus status) {
         this.id = id;
@@ -43,6 +72,9 @@ public class Post {
         this(content, LocalDateTime.now(), status);
     }
 
+    public void addLabel(Label label) {
+        this.labels.add(label);
+    }
     public Long getId() {
         return id;
     }
@@ -83,6 +115,14 @@ public class Post {
     public void setStatus(PostStatus status) {
         this.status = status;
         this.updated = LocalDateTime.now();
+    }
+
+    public void setCreated(LocalDateTime created) {
+        this.created = created;
+    }
+
+    public void setUpdated(LocalDateTime updated) {
+        this.updated = updated;
     }
 
     @Override
