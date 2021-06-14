@@ -16,7 +16,7 @@ import java.util.List;
 public class PostRepositoryHiber implements PostRepository {
     @Override
     public List<Post> getByWriterId(Long writerId) {
-        try (Session session = HibernateWorker.getSessionFactory().openSession()) {
+        try (Session session = HibernateWorker.getSession()) {
             Writer dummyWriter = session.load(Writer.class, writerId);
             List<Post> posts = dummyWriter.getPosts();
             posts = (posts == null || posts.isEmpty())
@@ -28,7 +28,7 @@ public class PostRepositoryHiber implements PostRepository {
 
     @Override
     public Long save(Post post, Long writerId) {
-        try (Session session = HibernateWorker.getSessionFactory().openSession()) {
+        try (Session session = HibernateWorker.getSession()) {
             session.beginTransaction();
             Writer dummyWriter = session.load(Writer.class, writerId);
             Long id = null;
@@ -49,7 +49,7 @@ public class PostRepositoryHiber implements PostRepository {
 
     @Override
     public void delete(Long postId) {
-        try (Session session = HibernateWorker.getSessionFactory().openSession()) {
+        try (Session session = HibernateWorker.getSession()) {
             session.beginTransaction();
             Post currentPost = session.get(Post.class, postId);
             session.delete(currentPost);
@@ -59,7 +59,7 @@ public class PostRepositoryHiber implements PostRepository {
 
     @Override
     public Post get(Long postId) {
-        try (Session session = HibernateWorker.getSessionFactory().openSession()) {
+        try (Session session = HibernateWorker.getSession()) {
             return session.get(Post.class, postId);
         }
     }

@@ -27,10 +27,6 @@ public class HibernateWorker {
         }
     }
 
-    public static SessionFactory getSessionFactory() {
-        return sessionFactory;
-    }
-
     public static Session getSession(){
         return sessionFactory.openSession();
     }

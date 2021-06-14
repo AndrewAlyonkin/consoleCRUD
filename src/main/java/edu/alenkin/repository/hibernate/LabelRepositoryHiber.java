@@ -6,7 +6,6 @@ import edu.alenkin.repository.LabelRepository;
 import edu.alenkin.utils.hiber.HibernateWorker;
 import org.hibernate.Session;
 
-import javax.persistence.Query;
 import java.util.Collections;
 import java.util.List;
 
@@ -18,11 +17,11 @@ public class LabelRepositoryHiber implements LabelRepository {
     @Override
     public List<Label> getByPostId(Long postId) {
         try (Session session = HibernateWorker.getSession()) {
-           Post dummyPost = session.load(Post.class, postId);
-           List<Label> labels = dummyPost.getLabels();
-           labels = (labels == null || labels.isEmpty())
-                   ? Collections.emptyList()
-                   : labels;
+            Post dummyPost = session.load(Post.class, postId);
+            List<Label> labels = dummyPost.getLabels();
+            labels = (labels == null || labels.isEmpty())
+                    ? Collections.emptyList()
+                    : labels;
             session.close();
             return labels;
         }
@@ -47,7 +46,7 @@ public class LabelRepositoryHiber implements LabelRepository {
 
     @Override
     public void delete(Long labelId) {
-        try (Session session = HibernateWorker.getSessionFactory().openSession()) {
+        try (Session session = HibernateWorker.getSession()) {
             session.beginTransaction();
             Label forDelete = (Label) session.get(Label.class, labelId);
             session.delete(forDelete);
