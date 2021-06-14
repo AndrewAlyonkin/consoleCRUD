@@ -17,7 +17,7 @@ import java.util.List;
 public class LabelRepositoryHiber implements LabelRepository {
     @Override
     public List<Label> getByPostId(Long postId) {
-        try (Session session = HibernateWorker.getSessionFactory().openSession()) {
+        try (Session session = HibernateWorker.getSession()) {
            Post dummyPost = session.load(Post.class, postId);
            List<Label> labels = dummyPost.getLabels();
            labels = (labels == null || labels.isEmpty())
@@ -30,12 +30,16 @@ public class LabelRepositoryHiber implements LabelRepository {
 
     @Override
     public Long save(Label label, Long ownerId) {
-        Long id;
-        try (Session session = HibernateWorker.getSessionFactory().openSession()) {
+        Long id = null;
+        try (Session session = HibernateWorker.getSession()) {
             session.beginTransaction();
             Post dummyPost = session.load(Post.class, ownerId);
             dummyPost.addLabel(label);
-            id = (Long) session.save(label);
+            if (label.getId() != null) {
+                session.saveOrUpdate(label);
+            } else {
+                id = (Long) session.save(label);
+            }
             session.getTransaction().commit();
         }
         return id;
@@ -53,8 +57,6 @@ public class LabelRepositoryHiber implements LabelRepository {
 
     @Override
     public Label get(Long labelId) {
-        try (Session session = HibernateWorker.getSessionFactory().openSession()) {
-            return (Label) session.get(Label.class, labelId);
-        }
+        return HibernateWorker.getSession().get(Label.class, labelId);
     }
 }

@@ -66,7 +66,7 @@ public class PostController {
             Long postId = Long.parseLong(id);
             labelController.refresh(postService.get(postId));
         } catch (Exception e) {
-            postView.err(e.getMessage());
+            e.printStackTrace();
             postView.err("Введите корректный id.");
         }
     }
@@ -78,7 +78,7 @@ public class PostController {
             Long postId = Long.parseLong(id);
             postService.remove(postId);
         } catch (Exception e) {
-            postView.err(e.getMessage());
+            e.printStackTrace();
             postView.err("Введите корректный id из таблицы");
         }
     }
@@ -97,7 +97,7 @@ public class PostController {
             currentPost.setStatus(status);
             postService.update(currentPost, writerId);
         } catch (Exception e) {
-            postView.err(e.getMessage());
+            e.printStackTrace();
             postView.err("Введите id поста из таблицы!");
         }
     }

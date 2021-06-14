@@ -39,9 +39,9 @@ public class Post {
     @Column(name = "update_time", columnDefinition = "TIMESTAMP")
     private LocalDateTime updated;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "post_id")
     private List<Label> labels;
 
     @Enumerated(EnumType.STRING)

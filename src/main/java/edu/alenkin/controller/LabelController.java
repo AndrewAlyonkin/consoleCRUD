@@ -58,7 +58,7 @@ public class LabelController {
             Long labelId = Long.parseLong(id);
             labelService.remove(labelId);
         } catch (Exception e) {
-            labelView.err(e.getMessage());
+            e.printStackTrace();
             labelView.err("Введите корректный id!");
         }
     }

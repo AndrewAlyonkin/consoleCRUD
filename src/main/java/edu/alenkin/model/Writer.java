@@ -24,11 +24,14 @@ public class Writer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", columnDefinition = "BIGINT", nullable = false)
     private Long id;
+
     @Column(name = "first_name", columnDefinition = "VARCHAR", nullable = false)
     private String firstName;
+
     @Column(name = "last_name", columnDefinition = "VARCHAR", nullable = false)
     private String lastName;
-    @OneToMany(fetch = FetchType.LAZY)
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "writer_id")
     private List<Post> posts = new ArrayList<>();

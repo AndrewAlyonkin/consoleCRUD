@@ -51,9 +51,14 @@ public class WriterRepositoryHiber implements WriterRepository {
     public Long save(Writer writer) {
         try (Session session = HibernateWorker.getSessionFactory().openSession()) {
             session.beginTransaction();
-            Long writerId = (Long) session.save(writer);
+            Long id = null;
+            if (writer.getId() != null) {
+                session.saveOrUpdate(writer);
+            } else {
+                id = (long) session.save(writer);
+            }
             session.getTransaction().commit();
-            return writerId;
+            return id;
         }
     }
 

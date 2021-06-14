@@ -61,7 +61,7 @@ public class WriterController {
             Long id = Long.parseLong(action);
             writerService.remove(id);
         } catch (Exception e) {
-            writerView.err(e.getMessage());
+            e.printStackTrace();
             writerView.err("Введите корректный id.");
             return;
         }
@@ -76,7 +76,7 @@ public class WriterController {
             writerView.show(currentWriter);
             postController.refresh(currentWriter);
         } catch (Exception e) {
-            writerView.err(e.getMessage());
+            e.printStackTrace();
             writerView.err("Введите корректный id.");
         }
     }

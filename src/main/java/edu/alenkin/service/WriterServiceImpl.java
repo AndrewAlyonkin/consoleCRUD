@@ -1,9 +1,8 @@
 package edu.alenkin.service;
 
 import edu.alenkin.model.Writer;
+import edu.alenkin.repository.RepositoryFactory;
 import edu.alenkin.repository.WriterRepository;
-import edu.alenkin.repository.hibernate.WriterRepositoryHiber;
-import edu.alenkin.repository.jdbc.WriterRepositoryJdbc;
 
 import java.util.List;
 
@@ -19,14 +18,13 @@ public class WriterServiceImpl implements WriterService {
     private WriterRepository wRepo;
 
     public WriterServiceImpl() {
-        //this.wRepo = new WriterRepositoryJdbc();
-        this.wRepo = new WriterRepositoryHiber();
+        this.wRepo = RepositoryFactory.getWriterRepository();
     }
 
     @Override
     @Deprecated
     public Long add(Writer addEntity, Long ownerId) {
-       throw new IllegalArgumentException("Writer can not have the owner, operation with ownerId parameter is forbidden!");
+        throw new IllegalArgumentException("Writer can not have the owner, operation with ownerId parameter is forbidden!");
     }
 
     @Override

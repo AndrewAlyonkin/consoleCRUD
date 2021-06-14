@@ -31,13 +31,17 @@ public class PostRepositoryHiber implements PostRepository {
         try (Session session = HibernateWorker.getSessionFactory().openSession()) {
             session.beginTransaction();
             Writer dummyWriter = session.load(Writer.class, writerId);
-            dummyWriter.addPost(post);
-            Long id;
-            if (session.get(Post.class, post.getId()) != null) {
-                session.delete(post);
+            Long id = null;
+            if (post.getId() != null) {
+                Post current = session.get(Post.class, post.getId());
+                current.setStatus(post.getStatus());
+                current.setContent(post.getContent());
+                current.setLabels(post.getLabels());
                 id = post.getId();
+            } else {
+                dummyWriter.addPost(post);
+                id = (Long) session.save(post);
             }
-            id = (Long) session.save(post);
             session.getTransaction().commit();
             return id;
         }
